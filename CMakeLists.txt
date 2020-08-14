@@ -67,9 +67,12 @@ add_subdirectory(libraries)
 set(LINKED_LIBS geometry-central pcg::pcg)
 
 if(WITH_NETCDF)
-  find_package(NetCDF_cxx4 REQUIRED)
-  list(APPEND LINKED_LIBS NetCDF::NetCDF_cxx4)
-endif()
+  # find_package(NetCDF_cxx4 REQUIRED)
+  # list(APPEND LINKED_LIBS NetCDF::NetCDF_cxx4)
+
+  find_package(NetCDF REQUIRED)
+  list(APPEND LINKED_LIBS NetCDF::NetCDF)
+  endif()
 
 # ##############################################################################
 # DDG SOLVER LIBRARY
@@ -92,8 +95,8 @@ if(WITH_NETCDF)
 endif()
 
 # ddgsolver library
-add_library(ddgsolver SHARED $<TARGET_OBJECTS:mem3dg_objlib>)
-target_link_libraries(ddgsolver PUBLIC mem3dg_objlib)
+add_library(mem3dg $<TARGET_OBJECTS:mem3dg_objlib>)
+target_link_libraries(mem3dg PUBLIC mem3dg_objlib geometry-central)
 
 if(BUILD_PYMEM3DG)
   add_subdirectory(pymem3dg)
@@ -109,13 +112,13 @@ endif()
 include(GNUInstallDirs)
 # Install targets and headers
 install(
-  TARGETS ddgsolver
+  TARGETS mem3dg
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 install(
-  DIRECTORY include/ddgsolver
+  DIRECTORY include/mem3dg
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   FILES_MATCHING
   PATTERN "*.h"

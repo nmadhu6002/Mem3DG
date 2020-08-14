@@ -12,8 +12,6 @@
 #     Padmini Rangamani (prangamani@eng.ucsd.edu)
 #
 
-cmake_minimum_required(VERSION 3.14)
-
 include(FetchContent)
 
 FetchContent_Declare(
@@ -56,7 +54,7 @@ set(TEST_SRCS src/main_test.cpp src/mapping_test.cpp src/dotproduct_test.cpp
 )
 
 add_executable(Mem3DG-tests "${TEST_SRCS}")
-target_link_libraries(Mem3DG-tests ddgsolver gtest_main)
+target_link_libraries(Mem3DG-tests mem3dg gtest_main)
 
 add_test(NAME Mem3DG_Main_Tests COMMAND Mem3DG-tests)
 
@@ -64,6 +62,6 @@ add_test(NAME Mem3DG_Main_Tests COMMAND Mem3DG-tests)
 # ##############################################################################
 # Main DDG target
 # ##############################################################################
-# add_executable(ddg scratch.cpp) target_link_libraries(ddg PRIVATE
-# ddgsolver polyscope) set_target_properties(ddg PROPERTIES
-# CXX_VISIBILITY_PRESET hidden)
+add_executable(scratchtest scratch.cpp) 
+target_link_libraries(scratchtest PRIVATE mem3dg) 
+set_target_properties(scratchtest PROPERTIES CXX_VISIBILITY_PRESET hidden)

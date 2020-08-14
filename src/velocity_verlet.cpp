@@ -68,8 +68,8 @@ void velocityVerlet(Force &f, double dt, double total_time, double tolerance,
   size_t nMollify = size_t(tMollify / tSave);
 
 #ifdef MEM3DG_WITH_NETCDF
-  TrajFile fd = TrajFile::newFile(outputDir + "/traj.nc", f.mesh,
-                                  TrajFile::NcFile::replace);
+  // TrajFile fd = TrajFile::newFile(outputDir + "/traj.nc", f.mesh,
+  //                                 TrajFile::NcFile::replace);
 #endif
 
   for (int i = 0; i <= total_time / dt; i++) {
@@ -113,9 +113,9 @@ void velocityVerlet(Force &f, double dt, double total_time, double tolerance,
     if ((i % nSave == 0) || (i == int(total_time / dt))) {
 
 #ifdef MEM3DG_WITH_NETCDF
-      std::size_t frame = fd.getNextFrameIndex();
-      fd.writeTime(frame, i * dt);
-      fd.writeCoords(frame, EigenMap<double, 3>(f.vpg.inputVertexPositions));
+      // std::size_t frame = fd.getNextFrameIndex();
+      // fd.writeTime(frame, i * dt);
+      // fd.writeCoords(frame, EigenMap<double, 3>(f.vpg.inputVertexPositions));
 #endif
 
       // 1. save
@@ -126,7 +126,7 @@ void velocityVerlet(Force &f, double dt, double total_time, double tolerance,
       f.richData.addVertexProperty("mean_curvature", H);
 
 #ifdef MEM3DG_WITH_NETCDF
-      fd.writeMeanCurvature(frame, H.raw());
+      // fd.writeMeanCurvature(frame, H.raw());
 #endif
 
       gcs::VertexData<double> H0(f.mesh);
