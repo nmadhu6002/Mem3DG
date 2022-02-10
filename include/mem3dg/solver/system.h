@@ -751,6 +751,11 @@ public:
   void computeDPDForces(double dt);
 
   /**
+   * @brief Compute noise force
+   */
+  gcs::VertexData<gc::Vector3> computeNoiseForce(double stdev);
+
+  /**
    * @brief Compute damping forces of the system
    */
   gc::VertexData<gc::Vector3> computeDampingForce();

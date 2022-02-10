@@ -185,6 +185,14 @@ PYBIND11_MODULE(_core, pymem3dg) {
                       R"delim(
           period of update geodesics
       )delim");
+  euler.def_readwrite("fluctuatePeriod", &Euler::fluctuatePeriod,
+                      R"delim(
+          period of add fluctuation
+      )delim");
+  euler.def_readwrite("fluctuateAmplitude", &Euler::fluctuateAmplitude,
+                      R"delim(
+          Amplitude of add fluctuation
+      )delim");
   euler.def_readwrite("processMeshPeriod", &Euler::processMeshPeriod,
                       R"delim(
           period of processing mesh

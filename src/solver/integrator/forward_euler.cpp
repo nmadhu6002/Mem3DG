@@ -102,6 +102,13 @@ bool Euler::integrate() {
       system.updateConfigurations(false);
     }
 
+    if (system.time - lastFluctuate > (fluctuatePeriod * timeStep)) {
+      lastFluctuate = system.time;
+      system.vpg->inputVertexPositions +=
+          system.computeNoiseForce(fluctuateAmplitude);
+      system.updateConfigurations(false);
+    }
+
     // update geodesics every tUpdateGeodesics period
     if (system.time - lastUpdateGeodesics >
         (updateGeodesicsPeriod * timeStep)) {
@@ -110,7 +117,8 @@ bool Euler::integrate() {
     }
 
     // step forward
-    if (system.time == lastProcessMesh || system.time == lastUpdateGeodesics) {
+    if (system.time == lastProcessMesh || system.time == lastUpdateGeodesics ||
+        system.time == lastFluctuate) {
       system.time += 1e-10 * characteristicTimeStep;
     } else {
       march();
@@ -216,8 +224,7 @@ void Euler::march() {
   // regularization
   if (system.meshProcessor.isMeshRegularize) {
     system.computeRegularizationForce();
-    system.vpg->inputVertexPositions.raw() +=
-        system.forces.regularizationForce.raw();
+    system.vpg->inputVertexPositions += system.forces.regularizationForce;
   }
 
   // recompute cached values

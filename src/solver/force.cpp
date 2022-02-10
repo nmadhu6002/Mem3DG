@@ -650,6 +650,23 @@ void System::computeDPDForces(double dt) {
   //     forces.maskForce(forces.addNormal(forces.ontoNormal(stochasticForce_e)));
 }
 
+gcs::VertexData<gc::Vector3> System::computeNoiseForce(double stdev) {
+  gcs::VertexData<gc::Vector3> f(*mesh);
+  std::normal_distribution<double> normal_dist(0, stdev);
+  for (gcs::Edge e : mesh->edges()) {
+    gcs::Halfedge he = e.halfedge();
+    gcs::Vertex v1 = he.vertex();
+    gcs::Vertex v2 = he.next().vertex();
+    gc::Vector3 direction =
+        (vpg->inputVertexPositions[v1] - vpg->inputVertexPositions[v2])
+            .normalize();
+    double noise = normal_dist(rng);
+    f[v1] += noise * direction;
+    f[v2] -= noise * direction;
+  }
+  return forces.maskForce(f);
+}
+
 gc::VertexData<gc::Vector3> System::computeDampingForce() {
   return -parameters.damping * velocity;
 }

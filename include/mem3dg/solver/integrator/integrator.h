@@ -50,6 +50,8 @@ protected:
   double lastSave;
   /// last time updating geodesics
   double lastUpdateGeodesics;
+  /// last time add fluctuation
+  double lastFluctuate;
   /// last time processing mesh
   double lastProcessMesh;
   /// last time compute avoiding force
@@ -91,9 +93,13 @@ public:
   std::string outputDirectory;
 
   /// period of saving output data
-  double updateGeodesicsPeriod;
+  std::size_t updateGeodesicsPeriod;
+  /// period of fluctuate
+  std::size_t fluctuatePeriod;
+  /// amplitude of fluctuate
+  double fluctuateAmplitude;
   /// period of saving output data
-  double processMeshPeriod;
+  std::size_t processMeshPeriod;
   /// name of the trajectory file
   std::string trajFileName = "traj.nc";
   /// option to scale time step according to mesh size
@@ -120,11 +126,13 @@ public:
              std::string outputDirectory_)
       : system(system_), characteristicTimeStep(characteristicTimeStep_),
         totalTime(totalTime_), savePeriod(savePeriod_), tolerance(tolerance_),
-        updateGeodesicsPeriod(totalTime_), processMeshPeriod(totalTime_),
-        outputDirectory(outputDirectory_), initialTime(system_.time),
-        lastUpdateGeodesics(system_.time), lastProcessMesh(system_.time),
-        lastComputeAvoidingForce(system_.time), lastSave(system_.time),
-        timeStep(characteristicTimeStep_) {
+        updateGeodesicsPeriod(std::numeric_limits<size_t>::max()),
+        processMeshPeriod(std::numeric_limits<size_t>::max()),
+        fluctuatePeriod(std::numeric_limits<size_t>::max()),
+        fluctuateAmplitude(0.0), outputDirectory(outputDirectory_),
+        initialTime(system_.time), lastUpdateGeodesics(system_.time),
+        lastProcessMesh(system_.time), lastComputeAvoidingForce(system_.time),
+        lastSave(system_.time), timeStep(characteristicTimeStep_) {
 
     // Initialize the timestep-meshsize ratio
     dt_size2_ratio = characteristicTimeStep /
