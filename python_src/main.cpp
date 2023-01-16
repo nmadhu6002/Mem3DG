@@ -1338,6 +1338,11 @@ PYBIND11_MODULE(_core, pymem3dg) {
                           R"delim(
           get the option of whether simulate protein variation
       )delim");
+  variation.def_readwrite("isProtein2Variation",
+                          &Parameters::Variation::isProtein2Variation,
+                          R"delim(
+          get the option of whether simulate protein variation
+      )delim");
   variation.def_readwrite("isProteinConservation",
                           &Parameters::Variation::isProteinConservation,
                           R"delim(

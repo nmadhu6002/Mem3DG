@@ -190,6 +190,8 @@ struct Parameters {
   struct Variation {
     /// Whether or not consider protein binding
     bool isProteinVariation = false;
+    /// Whether or not consider protein2 binding
+    bool isProtein2Variation = false;
     /// Whether conserve protein mass;
     bool isProteinConservation = false;
     /// Whether or not consider shape evolution
