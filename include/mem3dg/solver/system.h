@@ -89,10 +89,18 @@ struct Energy {
   double entropyEnergy = 0;
   /// line tension energy of interface
   double dirichletEnergy = 0;
+  /// aggregation energy of the membrane protein 2
+  double aggregation2Energy = 0;
+  /// entropy energy of the membrane protein 2
+  double entropy2Energy = 0;
+  /// line tension energy of interface for protein 2
+  double dirichlet2Energy = 0;
   /// work of external force
   double externalWork = 0;
   /// protein interior penalty energy
   double proteinInteriorPenalty = 0;
+  /// protein 2 interior penalty energy
+  double protein2InteriorPenalty = 0;
   /// membrane self-avoidance penalty energy
   double selfAvoidancePenalty = 0;
   /// mesh edge spring energy
@@ -147,6 +155,14 @@ public:
   gcs::VertexData<gc::Vector3> velocity;
   /// Cached vertex protein rate of change
   gcs::VertexData<double> proteinRateOfChange;
+
+  /// Cached protein 2 surface density
+  gcs::VertexData<double> protein2Density;
+  /// Spontaneous curvature gradient of the mesh from protein 2
+  gcs::FaceData<gc::Vector3> protein2DensityGradient;
+  /// Cached vertex protein 2 rate of change
+  gcs::VertexData<double> protein2RateOfChange;
+
   /// Spontaneous curvature of the mesh
   gcs::VertexData<double> H0;
   /// Bending rigidity of the membrane
@@ -691,6 +707,7 @@ public:
    * @brief Compute in plane flux form on edge
    */
   EigenVectorX1d computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential);
+  EigenVectorX1d computeInPlaneFluxForm2(EigenVectorX1d &chemical2Potential);
 
   // ==========================================================
   // ================        energy.cpp      ==================

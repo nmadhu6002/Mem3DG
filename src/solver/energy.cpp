@@ -135,18 +135,30 @@ void System::computePressureEnergy() {
 //       (proteinDensity.raw().array() * proteinDensity.raw().array()).sum();
 // }
 
-void System::computeAdsorptionEnergy() {
-  energy.adsorptionEnergy =
-      parameters.adsorption.epsilon *
-      (vpg->vertexDualAreas.raw().array() * proteinDensity.raw().array()).sum();
+void System::computeAdsorptionEnergy(bool protein, bool protein2) {
+  if (protein)
+    energy.adsorptionEnergy =
+        parameters.adsorption.epsilon *
+        (vpg->vertexDualAreas.raw().array() * proteinDensity.raw().array()).sum();
+  if (protein2)
+    energy.adsorption2Energy =
+        parameters.adsorption.epsilon2 *
+        (vpg->vertexDualAreas.raw().array() * protein2Density.raw().array()).sum();
 }
 
-void System::computeAggregationEnergy() {
-  energy.aggregationEnergy =
-      parameters.aggregation.chi *
-      (vpg->vertexDualAreas.raw().array() *
-       ((2 * proteinDensity.raw().array() - 1).square() - 1).square())
-          .sum();
+void System::computeAggregationEnergy(bool protein, bool protein2) {
+  if (protein)
+    energy.aggregationEnergy =
+        parameters.aggregation.chi *
+        (vpg->vertexDualAreas.raw().array() *
+        ((2 * proteinDensity.raw().array() - 1).square() - 1).square())
+            .sum();
+  if (protein2)
+    energy.aggregation2Energy =
+        parameters.aggregation.chi2 *
+        (vpg->vertexDualAreas.raw().array() *
+        ((2 * protein2Density.raw().array() - 1).square() - 1).square())
+            .sum();
   // energy.aggregationEnergy =
   //     parameters.aggregation.chi *
   //     (vpg->vertexDualAreas.raw().array() * proteinDensity.raw().array() *
@@ -154,14 +166,23 @@ void System::computeAggregationEnergy() {
   //         .sum();
 }
 
-void System::computeEntropyEnergy() {
-  energy.entropyEnergy =
-      parameters.entropy.xi *
-      (vpg->vertexDualAreas.raw().array() *
-       (proteinDensity.raw().array().log() * proteinDensity.raw().array() +
-        (1 - proteinDensity.raw().array()).log() *
-            (1 - proteinDensity.raw().array())))
-          .sum();
+void System::computeEntropyEnergy(bool protein, bool protein2) {
+  if (protein)
+    energy.entropyEnergy =
+        parameters.entropy.xi *
+        (vpg->vertexDualAreas.raw().array() *
+        (proteinDensity.raw().array().log() * proteinDensity.raw().array() +
+          (1 - proteinDensity.raw().array()).log() *
+              (1 - proteinDensity.raw().array())))
+            .sum();
+  if (protein2)
+    energy.entropy2Energy =
+        parameters.entropy.xi2 *
+        (vpg->vertexDualAreas.raw().array() *
+        (protein2Density.raw().array().log() * protein2Density.raw().array() +
+          (1 - protein2Density.raw().array()).log() *
+              (1 - protein2Density.raw().array())))
+            .sum();
   // energy.entropyEnergy =
   //     parameters.entropy.xi *
   //     (vpg->vertexDualAreas.raw().array() *
@@ -170,12 +191,18 @@ void System::computeEntropyEnergy() {
   //         .sum();
 }
 
-void System::computeProteinInteriorPenalty() {
+void System::computeProteinInteriorPenalty(bool protein, bool protein2) {
   // interior method to constrain protein density to remain from 0 to 1
-  energy.proteinInteriorPenalty =
-      -parameters.protein.proteinInteriorPenalty *
-      ((proteinDensity.raw().array()).log().sum() +
-       (1 - proteinDensity.raw().array()).log().sum());
+  if (protein)
+    energy.proteinInteriorPenalty =
+        -parameters.protein.proteinInteriorPenalty *
+        ((proteinDensity.raw().array()).log().sum() +
+        (1 - proteinDensity.raw().array()).log().sum());
+  if (protein2)
+    energy.protein2InteriorPenalty =
+        -parameters.protein2.proteinInteriorPenalty *
+        ((protein2Density.raw().array()).log().sum() +
+        (1 - protein2Density.raw().array()).log().sum());
 }
 
 void System::computeSelfAvoidanceEnergy() {
@@ -216,7 +243,7 @@ void System::computeSelfAvoidanceEnergy() {
   energy.selfAvoidancePenalty = e;
 }
 
-void System::computeDirichletEnergy() {
+void System::computeDirichletEnergy(bool protein, bool protein2) {
   if (false) {
     mem3dg_runtime_error("computeDirichletEnergy: out of date implementation, "
                          "shouldn't be called!");
@@ -229,11 +256,21 @@ void System::computeDirichletEnergy() {
   }
 
   // explicit dirichlet energy
-  energy.dirichletEnergy = 0;
-  for (gcs::Face f : mesh->faces()) {
-    energy.dirichletEnergy += 0.5 * parameters.dirichlet.eta *
-                              proteinDensityGradient[f].norm2() *
-                              vpg->faceAreas[f];
+  if (protein){
+    energy.dirichletEnergy = 0;
+    for (gcs::Face f : mesh->faces()) {
+      energy.dirichletEnergy += 0.5 * parameters.dirichlet.eta *
+                                proteinDensityGradient[f].norm2() *
+                                vpg->faceAreas[f];
+    }
+  }
+  if (protein2){
+    energy.dirichlet2Energy = 0;
+    for (gcs::Face f : mesh->faces()) {
+      energy.dirichlet2Energy += 0.5 * parameters.dirichlet.eta2 *
+                                 protein2DensityGradient[f].norm2() *
+                                 vpg->faceAreas[f];
+    }
   }
 
   // alternative dirichlet energy after integration by part
@@ -254,8 +291,13 @@ double System::computePotentialEnergy() {
   energy.aggregationEnergy = 0;
   energy.entropyEnergy = 0;
   energy.dirichletEnergy = 0;
+  energy.adsorption2Energy = 0;
+  energy.aggregation2Energy = 0;
+  energy.entropy2Energy = 0;
+  energy.dirichlet2Energy = 0;
   energy.selfAvoidancePenalty = 0;
   energy.proteinInteriorPenalty = 0;
+  energy.protein2InteriorPenalty = 0;
   energy.edgeSpringEnergy = 0;
   energy.faceSpringEnergy = 0;
   energy.lcrSpringEnergy = 0;
@@ -270,18 +312,14 @@ double System::computePotentialEnergy() {
     computeSurfaceEnergy();
   if (parameters.osmotic.Kv != 0)
     computePressureEnergy();
-  if (parameters.adsorption.epsilon != 0) {
-    computeAdsorptionEnergy();
-  }
-  if (parameters.aggregation.chi != 0) {
-    computeAggregationEnergy();
-  }
-  if (parameters.entropy.xi != 0) {
-    computeEntropyEnergy();
-  }
-  if (parameters.dirichlet.eta != 0) {
-    computeDirichletEnergy();
-  }
+  computeAdsorptionEnergy(parameters.aggregation.epsilon != 0,
+                          parameters.aggregation.epsilon2 != 0);
+  computeAggregationEnergy(parameters.aggregation.epsilon != 0,
+                          parameters.aggregation.epsilon2 != 0);
+  computeEntropyEnergy(parameters.aggregation.epsilon != 0,
+                          parameters.aggregation.epsilon2 != 0);
+  computeDirichletEnergy(parameters.aggregation.epsilon != 0,
+                          parameters.aggregation.epsilon2 != 0);
   if (parameters.selfAvoidance.mu != 0) {
     computeSelfAvoidanceEnergy();
   }
@@ -294,19 +332,21 @@ double System::computePotentialEnergy() {
   if (parameters.spring.Kst != 0) {
     computeLcrSpringEnergy();
   }
-  if (parameters.variation.isProteinVariation &&
-      parameters.protein.proteinInteriorPenalty != 0) {
-    computeProteinInteriorPenalty();
-  }
+  computeProteinInteriorPenalty(
+      parameters.variation.isProteinVariation &&
+          parameters.protein.proteinInteriorPenalty != 0,
+      parameters.variation.isProtein2Variation &&
+          parameters.protein2.proteinInteriorPenalty != 0)
 
   // summerize internal potential energy
   energy.potentialEnergy =
       energy.spontaneousCurvatureEnergy + energy.deviatoricCurvatureEnergy +
       energy.areaDifferenceEnergy + energy.surfaceEnergy +
       energy.pressureEnergy + energy.adsorptionEnergy + energy.dirichletEnergy +
-      energy.aggregationEnergy + energy.entropyEnergy +
-      energy.selfAvoidancePenalty + energy.proteinInteriorPenalty +
-      energy.edgeSpringEnergy + energy.faceSpringEnergy +
+      energy.aggregationEnergy + energy.entropyEnergy + energy.adsorption2Energy + 
+      energy.dirichlet2Energy + energy.aggregation2Energy + energy.entropy2Energy +
+      energy.selfAvoidancePenalty + energy.proteinInteriorPenalty + 
+      energy.proteinInteriorPenalty + energy.edgeSpringEnergy + energy.faceSpringEnergy +
       energy.lcrSpringEnergy;
   return energy.potentialEnergy;
 }

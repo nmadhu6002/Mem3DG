@@ -73,6 +73,12 @@ DLL_PUBLIC struct Forces {
   gcs::VertexData<double> aggregationForce;
   /// Cached entropy induced surface force
   gcs::VertexData<double> entropyForce;
+  /// Cached adsorption induced surface force for protein 2
+  gcs::VertexData<double> adsorption2Force;
+  /// Cached aggregation induced surface force for protein 2
+  gcs::VertexData<double> aggregation2Force;
+  /// Cached entropy induced surface force for protein 2
+  gcs::VertexData<double> entropy2Force;
   /// Cached externally-applied force
   gcs::VertexData<double> externalForce;
   /// Cached self avoidance force
@@ -117,6 +123,12 @@ DLL_PUBLIC struct Forces {
   gcs::VertexData<gc::Vector3> aggregationForceVec;
   /// Cached entropy driven force
   gcs::VertexData<gc::Vector3> entropyForceVec;
+  /// Cached adsorption driven force from protein 2
+  gcs::VertexData<gc::Vector3> adsorption2ForceVec;
+  /// Cached aggregation driven force from protein 2
+  gcs::VertexData<gc::Vector3> aggregation2ForceVec;
+  /// Cached entropy driven force from protein 2
+  gcs::VertexData<gc::Vector3> entropy2ForceVec;
   /// Cached external localized force
   gcs::VertexData<gc::Vector3> externalForceVec;
   /// Cached self avoidance force
@@ -153,6 +165,23 @@ DLL_PUBLIC struct Forces {
   gcs::VertexData<double> entropyPotential;
   /// Cached chemical potential
   gcs::VertexData<double> chemicalPotential;
+
+  /// Cached interior penalty chemical potential
+  gcs::VertexData<double> interiorPenalty2Potential;
+  /// Cached spontaneous curvature related chemical potential
+  gcs::VertexData<double> spontaneousCurvature2Potential;
+  /// Cached deviatoric curvature related chemical potential
+  gcs::VertexData<double> deviatoricCurvature2Potential;
+  /// Cached adsorption related chemical potential
+  gcs::VertexData<double> adsorption2Potential;
+  /// Cached dirichlet energy related chemical potential
+  gcs::VertexData<double> dirichlet2Potential;
+  /// Cached aggregation related chemical potential
+  gcs::VertexData<double> aggregation2Potential;
+  /// Cached entropy related chemical potential
+  gcs::VertexData<double> entropy2Potential;
+  /// Cached chemical potential
+  gcs::VertexData<double> chemical2Potential;
 
   /// force mask
   gcs::VertexData<gc::Vector3> forceMask;

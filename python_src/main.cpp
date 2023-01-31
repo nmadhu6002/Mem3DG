@@ -1396,7 +1396,11 @@ PYBIND11_MODULE(_core, pymem3dg) {
       )delim");
   bending.def_readwrite("relation", &Parameters::Bending::relation,
                         R"delim(
-          get relation between H0 and protein densit, "linear" or "hill"
+          get relation between H0 and protein density, "linear" or "hill"
+      )delim");
+  bending.def_readwrite("relation2", &Parameters::Bending::relation2,
+                        R"delim(
+          get relation between H0 and protein density, "linear" or "hill"
       )delim");
 
   py::class_<Parameters::Tension> tension(pymem3dg, "Tension", R"delim(
@@ -1471,6 +1475,10 @@ PYBIND11_MODULE(_core, pymem3dg) {
                            R"delim(
           get adsorption energy per protein
       )delim");
+  adsorption.def_readwrite("epsilon2", &Parameters::Adsorption::epsilon2,
+                           R"delim(
+          get adsorption energy per protein
+      )delim");
 
   py::class_<Parameters::Aggregation> aggregation(pymem3dg, "Aggregation",
                                                   R"delim(
@@ -1480,12 +1488,20 @@ PYBIND11_MODULE(_core, pymem3dg) {
                             R"delim(
           get aggregation energy 
       )delim");
+  aggregation.def_readwrite("chi2", &Parameters::Aggregation::chi2,
+                            R"delim(
+          get aggregation energy 
+      )delim");
 
   py::class_<Parameters::Entropy> entropy(pymem3dg, "Entropy",
                                           R"delim(
         The entropy parameters
     )delim");
   entropy.def_readwrite("xi", &Parameters::Entropy::xi,
+                        R"delim(
+          get entropy parameters
+      )delim");
+  entropy.def_readwrite("xi2", &Parameters::Entropy::xi2,
                         R"delim(
           get entropy parameters
       )delim");
@@ -1670,6 +1686,10 @@ PYBIND11_MODULE(_core, pymem3dg) {
                            R"delim(
           protein parameters
       )delim");
+  parameters.def_readwrite("protein2", &Parameters::protein2,
+                           R"delim(
+          protein parameters
+      )delim");
   parameters.def_readwrite("variation", &Parameters::variation,
                            R"delim(
           variation parameters
@@ -1679,6 +1699,10 @@ PYBIND11_MODULE(_core, pymem3dg) {
           get Temperature 
       )delim");
   parameters.def_readwrite("proteinMobility", &Parameters::proteinMobility,
+                           R"delim(
+          get protein mobility constant 
+      )delim");
+  parameters.def_readwrite("protein2Mobility", &Parameters::protein2Mobility,
                            R"delim(
           get protein mobility constant 
       )delim");

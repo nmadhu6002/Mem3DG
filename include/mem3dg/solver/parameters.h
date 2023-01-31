@@ -76,6 +76,8 @@ struct Parameters {
     double H0c = 0;
     /// type of relation between H0 and protein density, "linear" or "hill"
     std::string relation = "linear";
+    /// type of relation between H0 and protein 2 density, "linear" or "hill"
+    std::string relation2 = "linear";
 
     /**
      * @brief check parameter conflicts
@@ -128,21 +130,29 @@ struct Parameters {
   struct Adsorption {
     /// binding energy per protein
     double epsilon = 0;
+    /// binding energy per protein 2
+    double epsilon2 = 0;
   };
 
   struct Aggregation {
     /// aggregation energy constant
     double chi = 0;
+    /// aggregation energy constant for protein 2
+    double chi2 = 0;
   };
 
   struct Entropy {
     /// entropy energy constant
     double xi = 0;
+    /// entropy energy constant for protein 2
+    double xi2 = 0;
   };
 
   struct Dirichlet {
     /// Smooothing coefficients
     double eta = 0;
+    /// Smooothing coefficients for protein 2
+    double eta2 = 0;
   };
 
   struct SelfAvoidance {
@@ -275,11 +285,15 @@ struct Parameters {
   Point point;
   /// protein distribution
   Protein protein = Protein();
+  /// protein2 distribution
+  Protein protein2 = Protein();
   /// mesh regularizer
   Spring spring;
 
   /// mobility constant
   double proteinMobility = 0;
+  /// protein2 mobility constant
+  double protein2Mobility = 0;
   /// Temperature
   double temperature = 293;
   /// damping coefficient
