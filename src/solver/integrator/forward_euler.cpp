@@ -168,7 +168,7 @@ void Euler::status() {
   system.addNonconservativeForcing(timeStep);
 
   // exit if under error tolerance
-  if (system.mechErrorNorm < tolerance && system.chemErrorNorm < tolerance) {
+  if (system.mechErrorNorm < tolerance && system.chemErrorNorm < tolerance && system.chem2ErrorNorm < tolerance) {
     if (ifPrintToConsole)
       std::cout << "\nError norm smaller than tolerance." << std::endl;
     EXIT = true;
@@ -206,7 +206,7 @@ void Euler::march() {
       system.proteinRateOfChange.raw() =
           system.parameters.proteinMobility * system.vpg->hodge0Inverse *
           system.vpg->d0.transpose() *
-          system.computeInPlaneFluxForm(system.forces.chemicalPotential.raw());
+          system.computeInPlaneFluxForm(system.forces.chemicalPotential.raw(), system.proteinDensity);
     } else {
       system.proteinRateOfChange = system.parameters.proteinMobility *
                                    system.forces.chemicalPotential /
@@ -214,6 +214,22 @@ void Euler::march() {
     }
     system.chemErrorNorm = (system.proteinRateOfChange.raw().array() *
                             system.forces.chemicalPotential.raw().array())
+                               .sum();
+  }
+
+  if (system.parameters.variation.isProtein2Variation) {
+    if (system.parameters.variation.isProtein2Conservation) {
+      system.protein2RateOfChange.raw() =
+          system.parameters.protein2Mobility * system.vpg->hodge0Inverse *
+          system.vpg->d0.transpose() *
+          system.computeInPlaneFluxForm(system.forces.chemicalPotential.raw(), system.protein2Density);
+    } else {
+      system.proteinRateOfChange = system.parameters.protein2Mobility *
+                                   system.forces.chemical2Potential /
+                                   system.vpg->vertexDualAreas;
+    }
+    system.chem2ErrorNorm = (system.protein2RateOfChange.raw().array() *
+                            system.forces.chemical2Potential.raw().array())
                                .sum();
   }
 
@@ -225,18 +241,24 @@ void Euler::march() {
   // backtracking to obtain stable time step
   if (isBacktrack) {
     double timeStep_mech = std::numeric_limits<double>::max(),
-           timeStep_chem = std::numeric_limits<double>::max();
+           timeStep_chem = std::numeric_limits<double>::max(),
+           timeStep_chem2 = std::numeric_limits<double>::max();
     if (system.parameters.variation.isShapeVariation)
       timeStep_mech = mechanicalBacktrack(toMatrix(system.velocity), rho, c1);
     if (system.parameters.variation.isProteinVariation)
       timeStep_chem =
           chemicalBacktrack(system.proteinRateOfChange.raw(), rho, c1);
-    timeStep = (timeStep_chem < timeStep_mech) ? timeStep_chem : timeStep_mech;
+    if (system.parameters.variation.isProteinVariation)
+      timeStep_chem2 =
+          chemicalBacktrack(system.protein2RateOfChange.raw(), rho, c1);
+    double temp_timeStep =(timeStep_chem < timeStep_mech) ? timeStep_chem : timeStep_mech;
+    timeStep = (timeStep_chem2 < temp_timeStep) ? timeStep_chem2 : temp_timeStep;
   } else {
     timeStep = characteristicTimeStep;
   }
   system.vpg->inputVertexPositions += system.velocity * timeStep;
   system.proteinDensity += system.proteinRateOfChange * timeStep;
+  system.protein2Density += system.protein2RateOfChange * timeStep;
   system.time += timeStep;
 
   // recompute cached values

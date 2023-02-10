@@ -67,6 +67,8 @@ struct Parameters {
     double Kd = 0;
     /// Constant of deviatoric modulus vs protein density
     double Kdc = 0;
+    /// Constant of deviatoric modulus vs protein 2 density
+    double Kdc2 = 0;
 
     /// Bending modulus
     double Kb = 0;
@@ -76,6 +78,11 @@ struct Parameters {
     double H0c = 0;
     /// type of relation between H0 and protein density, "linear" or "hill"
     std::string relation = "linear";
+
+    /// Constant of bending modulus vs protein 2 density
+    double Kbc2 = 0;
+    /// Constant of Spontaneous curvature vs protein 2 density
+    double H0c2 = 0;
     /// type of relation between H0 and protein 2 density, "linear" or "hill"
     std::string relation2 = "linear";
 
@@ -204,6 +211,8 @@ struct Parameters {
     bool isProtein2Variation = false;
     /// Whether conserve protein mass;
     bool isProteinConservation = false;
+    /// Whether conserve protein2 mass;
+    bool isProtein2Conservation = false;
     /// Whether or not consider shape evolution
     bool isShapeVariation = true;
     /// domain of shape variation

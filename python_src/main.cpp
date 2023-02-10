@@ -1348,6 +1348,11 @@ PYBIND11_MODULE(_core, pymem3dg) {
                           R"delim(
           get the option of whether conserve protein mass
       )delim");
+  variation.def_readwrite("isProtein2Conservation",
+                          &Parameters::Variation::isProtein2Conservation,
+                          R"delim(
+          get the option of whether conserve protein mass
+      )delim");
   variation.def_readwrite("isShapeVariation",
                           &Parameters::Variation::isShapeVariation,
                           R"delim(
@@ -1397,6 +1402,18 @@ PYBIND11_MODULE(_core, pymem3dg) {
   bending.def_readwrite("relation", &Parameters::Bending::relation,
                         R"delim(
           get relation between H0 and protein density, "linear" or "hill"
+      )delim");
+  bending.def_readwrite("Kbc2", &Parameters::Bending::Kbc2,
+                        R"delim(
+          get constant of bending modulus vs protein density
+      )delim");
+  bending.def_readwrite("H0c2", &Parameters::Bending::H0c2,
+                        R"delim(
+          get constant of spontaneous curvature vs protein density
+      )delim");
+  bending.def_readwrite("Kdc2", &Parameters::Bending::Kdc2,
+                        R"delim(
+          get constant of deviatoric modulus vs protein density
       )delim");
   bending.def_readwrite("relation2", &Parameters::Bending::relation2,
                         R"delim(

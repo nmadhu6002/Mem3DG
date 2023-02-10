@@ -312,14 +312,14 @@ double System::computePotentialEnergy() {
     computeSurfaceEnergy();
   if (parameters.osmotic.Kv != 0)
     computePressureEnergy();
-  computeAdsorptionEnergy(parameters.aggregation.epsilon != 0,
-                          parameters.aggregation.epsilon2 != 0);
-  computeAggregationEnergy(parameters.aggregation.epsilon != 0,
-                          parameters.aggregation.epsilon2 != 0);
-  computeEntropyEnergy(parameters.aggregation.epsilon != 0,
-                          parameters.aggregation.epsilon2 != 0);
-  computeDirichletEnergy(parameters.aggregation.epsilon != 0,
-                          parameters.aggregation.epsilon2 != 0);
+  computeAdsorptionEnergy(parameters.adsorption.epsilon != 0,
+                          parameters.adsorption.epsilon2 != 0);
+  computeAggregationEnergy(parameters.aggregation.chi != 0,
+                           parameters.aggregation.chi2 != 0);
+  computeEntropyEnergy(parameters.entropy.xi != 0,
+                       parameters.entropy.xi2 != 0);
+  computeDirichletEnergy(parameters.dirichlet.eta != 0,
+                         parameters.dirichlet.eta2 != 0);
   if (parameters.selfAvoidance.mu != 0) {
     computeSelfAvoidanceEnergy();
   }
@@ -336,7 +336,7 @@ double System::computePotentialEnergy() {
       parameters.variation.isProteinVariation &&
           parameters.protein.proteinInteriorPenalty != 0,
       parameters.variation.isProtein2Variation &&
-          parameters.protein2.proteinInteriorPenalty != 0)
+          parameters.protein2.proteinInteriorPenalty != 0);
 
   // summerize internal potential energy
   energy.potentialEnergy =

@@ -193,7 +193,7 @@ void VelocityVerlet::march() {
       system.proteinRateOfChange.raw() =
           system.parameters.proteinMobility * system.vpg->hodge0Inverse *
           system.vpg->d0.transpose() *
-          system.computeInPlaneFluxForm(system.forces.chemicalPotential.raw());
+          system.computeInPlaneFluxForm(system.forces.chemicalPotential.raw(), system.proteinDensity);
     } else {
       system.proteinRateOfChange = system.parameters.proteinMobility *
                                    system.forces.chemicalPotential /

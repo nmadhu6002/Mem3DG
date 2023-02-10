@@ -89,6 +89,8 @@ struct Energy {
   double entropyEnergy = 0;
   /// line tension energy of interface
   double dirichletEnergy = 0;
+  /// adsorption energy of the membrane protein
+  double adsorption2Energy = 0;
   /// aggregation energy of the membrane protein 2
   double aggregation2Energy = 0;
   /// entropy energy of the membrane protein 2
@@ -143,6 +145,8 @@ public:
   double mechErrorNorm;
   /// chemical error norm
   double chemErrorNorm;
+  /// chemical2 error norm
+  double chem2ErrorNorm;
   /// surface area
   double surfaceArea;
   /// Volume
@@ -701,13 +705,12 @@ public:
    * - dirichlet potential
    * - interior penalty potential
    */
-  void computeChemicalPotentials();
+  void computeChemicalPotentials(bool protein, bool protein2);
 
   /**
    * @brief Compute in plane flux form on edge
    */
-  EigenVectorX1d computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential);
-  EigenVectorX1d computeInPlaneFluxForm2(EigenVectorX1d &chemical2Potential);
+  EigenVectorX1d computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential, gcs::VertexData<double> proteinDensity);
 
   // ==========================================================
   // ================        energy.cpp      ==================
@@ -740,27 +743,27 @@ public:
   /**
    * @brief Compute adsorption energy
    */
-  void computeAdsorptionEnergy();
+  void computeAdsorptionEnergy(bool protein, bool protein2);
 
   /**
    * @brief Compute aggregation energy
    */
-  void computeAggregationEnergy();
+  void computeAggregationEnergy(bool protein, bool protein2);
 
   /**
    * @brief Compute entropy penalty
    */
-  void computeEntropyEnergy();
+  void computeEntropyEnergy(bool protein, bool protein2);
 
   /**
    * @brief Compute protein interior penalty
    */
-  void computeProteinInteriorPenalty();
+  void computeProteinInteriorPenalty(bool protein, bool protein2);
 
   /**
    * @brief Compute Dirichlet energy
    */
-  void computeDirichletEnergy();
+  void computeDirichletEnergy(bool protein, bool protein2);
 
   /**
    * @brief Compute self-avoidance energy

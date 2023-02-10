@@ -82,8 +82,8 @@ void System::computeGeometricForces(size_t i) {
 
     gc::Vector3 dphi_ijk{he.isInterior() ? proteinDensityGradient[fID]
                                          : gc::Vector3{0, 0, 0}};
-    gc::Vector3 dphi2_ijk{he.isInterior() ? proteinDensity2Gradient[fID]
-                                         : gc::Vector3{0, 0, 0}};
+    gc::Vector3 dphi2_ijk{he.isInterior() ? protein2DensityGradient[fID]
+                                          : gc::Vector3{0, 0, 0}};
     double Hj = vpg->vertexMeanCurvatures[i_vj] / vpg->vertexDualAreas[i_vj];
     double KGj = vpg->vertexGaussianCurvatures[i_vj];
     double H0j = H0[i_vj];
@@ -512,7 +512,7 @@ void System::computeChemicalPotentials(bool protein, bool protein2) {
 }
 
 EigenVectorX1d
-System::computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential) {
+System::computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential, gcs::VertexData<double> proteinDensity) {
   gcs::EdgeData<double> edgeProteinDensity(*mesh, 0);
   for (std::size_t i = 0; i < mesh->nEdges(); ++i) {
     gc::Edge e{mesh->edge(i)};
@@ -522,19 +522,6 @@ System::computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential) {
   }
   return vpg->hodge1 * edgeProteinDensity.raw().asDiagonal() * vpg->d0 *
          vpg->hodge0Inverse * chemicalPotential;
-}
-
-EigenVectorX1d
-System::computeInPlaneFluxForm2(EigenVectorX1d &chemical2Potential) {
-  gcs::EdgeData<double> edgeProtein2Density(*mesh, 0);
-  for (std::size_t i = 0; i < mesh->nEdges(); ++i) {
-    gc::Edge e{mesh->edge(i)};
-    gc::Halfedge he = e.halfedge();
-    edgeProtein2Density[i] = 0.5 * (protein2Density[he.tailVertex()] +
-                                   protein2Density[he.tipVertex()]);
-  }
-  return vpg->hodge1 * edgeProtein2Density.raw().asDiagonal() * vpg->d0 *
-         vpg->hodge0Inverse * chemical2Potential;
 }
 
 void System::computeDPDForces(double dt) {
