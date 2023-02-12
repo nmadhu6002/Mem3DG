@@ -1107,12 +1107,13 @@ PYBIND11_MODULE(_core, pymem3dg) {
    * @brief Method: force computation
    */
   system.def("computeInPlaneFluxForm", &System::computeInPlaneFluxForm,
-             py::arg("chemicalPotential"),
+             py::arg("chemicalPotential"), py::arg("proteinDensity"),
              R"delim(
             Compute in plane flux form from chemical potential 
 
             Args:
                 chemicalPotential (npt.NDArray[np.float64]): components (or sum) of chemical potential
+                proteinDensity (npt.NDArray[np.float64]): protein density of system
             
             Returns
                 np.NDArray[np.float64]: in plane flux form on edges  
