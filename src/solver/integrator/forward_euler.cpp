@@ -35,7 +35,7 @@ namespace integrator {
 namespace gc = ::geometrycentral;
 
 bool Euler::integrate() {
-
+  std::cout << "integrate" << std::endl;
   if (ifDisableIntegrate)
     mem3dg_runtime_error("integrate() is disabled for current construction!");
 
@@ -57,8 +57,9 @@ bool Euler::integrate() {
 
   // time integration loop
   const double avoidStrength = system.parameters.selfAvoidance.mu;
+  unsigned count = 0;
   for (;;) {
-
+    std::cout << count++  << std::endl;
     // turn on/off self-avoidance; outside status-march-cycle; before savedata
     // to write selfAvoidance
     if (avoidStrength != 0) {
@@ -163,6 +164,7 @@ void Euler::checkParameters() {
 }
 
 void Euler::status() {
+  std::cout << "status" << std::endl;
   // compute summerized forces
   system.computeConservativeForcing();
   system.addNonconservativeForcing(timeStep);
@@ -196,6 +198,7 @@ void Euler::status() {
 }
 
 void Euler::march() {
+  std::cout << "march" << std::endl;
   // compute velocity, which are independent of time
   system.velocity = system.forces.mechanicalForceVec;
   system.mechErrorNorm = (toMatrix(system.velocity).array() *
@@ -222,9 +225,9 @@ void Euler::march() {
       system.protein2RateOfChange.raw() =
           system.parameters.protein2Mobility * system.vpg->hodge0Inverse *
           system.vpg->d0.transpose() *
-          system.computeInPlaneFluxForm(system.forces.chemicalPotential.raw(), system.protein2Density);
+          system.computeInPlaneFluxForm(system.forces.chemical2Potential.raw(), system.protein2Density);
     } else {
-      system.proteinRateOfChange = system.parameters.protein2Mobility *
+      system.protein2RateOfChange = system.parameters.protein2Mobility *
                                    system.forces.chemical2Potential /
                                    system.vpg->vertexDualAreas;
     }
@@ -248,9 +251,9 @@ void Euler::march() {
     if (system.parameters.variation.isProteinVariation)
       timeStep_chem =
           chemicalBacktrack(system.proteinRateOfChange.raw(), rho, c1);
-    if (system.parameters.variation.isProteinVariation)
+    if (system.parameters.variation.isProtein2Variation)
       timeStep_chem2 =
-          chemicalBacktrack(system.protein2RateOfChange.raw(), rho, c1);
+          chemical2Backtrack(system.protein2RateOfChange.raw(), rho, c1);
     double temp_timeStep =(timeStep_chem < timeStep_mech) ? timeStep_chem : timeStep_mech;
     timeStep = (timeStep_chem2 < temp_timeStep) ? timeStep_chem2 : temp_timeStep;
   } else {
@@ -263,6 +266,7 @@ void Euler::march() {
 
   // recompute cached values
   system.updateConfigurations();
+  std::cout << "march end" << std::endl;
 }
 } // namespace integrator
 } // namespace solver

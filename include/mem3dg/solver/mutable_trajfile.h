@@ -697,17 +697,17 @@ private:
     double_array_t = traj_group.addVlenType(DOUBLE_ARR, nc::ncDouble);
 
     topo_var = traj_group.addVar(TOPO_VAR, uint_array_t, {frame_dim});
-    topo_var.setCompression(true, true, compression_level);
+    // topo_var.setCompression(true, true, compression_level);
     coord_var = traj_group.addVar(COORD_VAR, double_array_t, {frame_dim});
-    coord_var.setCompression(true, true, compression_level);
+    // coord_var.setCompression(true, true, compression_level);
     refcoord_var = traj_group.addVar(REFCOORD_VAR, double_array_t, {frame_dim});
-    refcoord_var.setCompression(true, true, compression_level);
+    // refcoord_var.setCompression(true, true, compression_level);
     phi_var = traj_group.addVar(PHI_VAR, double_array_t, {frame_dim});
-    phi_var.setCompression(true, true, compression_level);
+    // phi_var.setCompression(true, true, compression_level);
     vel_var = traj_group.addVar(VEL_VAR, double_array_t, {frame_dim});
-    vel_var.setCompression(true, true, compression_level);
+    // vel_var.setCompression(true, true, compression_level);
     extF_var = traj_group.addVar(EXTF_VAR, double_array_t, {frame_dim});
-    extF_var.setCompression(true, true, compression_level);
+    // extF_var.setCompression(true, true, compression_level);
   }
 
   /// Bound NcFile

@@ -43,6 +43,9 @@ void System::computeGeometricForces(gcs::Vertex &v) {
 }
 
 void System::computeGeometricForces(size_t i) {
+  if (i % 30 == 0){
+    std::cout << "computeGeometricForces" << std::endl;
+  }
   gc::Vertex v{mesh->vertex(i)};
   gc::Vector3 spontaneousCurvatureForceVec{0, 0, 0};
   gc::Vector3 spontaneousCurvatureForceVec_areaGrad{0, 0, 0};
@@ -165,6 +168,7 @@ void System::computeGeometricForces(size_t i) {
                   computeCornerAngleVariation(he.twin().corner(), he.vertex());
         }
       }
+      std::cout << "computeGeometricForces3" << std::endl;
       // deviatoricCurvatureForceVec_mean -=
       //     (Kdi * Hi + Kdj * Hj) * gaussVec +
       //     (Kdi * (-Hi * Hi) / 3 + Kdj * (-Hj * Hj) * 2 / 3) * areaGrad +
@@ -273,6 +277,7 @@ void System::computeGeometricForces(size_t i) {
   adsorptionForceVec = forces.maskForce(adsorptionForceVec, i);
   aggregationForceVec = forces.maskForce(aggregationForceVec, i);
   entropyForceVec = forces.maskForce(entropyForceVec, i);
+
   adsorption2ForceVec = forces.maskForce(adsorption2ForceVec, i);
   aggregation2ForceVec = forces.maskForce(aggregation2ForceVec, i);
   entropy2ForceVec = forces.maskForce(entropy2ForceVec, i);
@@ -296,6 +301,7 @@ void System::computeGeometricForces(size_t i) {
   forces.adsorptionForceVec[i] = adsorptionForceVec;
   forces.aggregationForceVec[i] = aggregationForceVec;
   forces.entropyForceVec[i] = entropyForceVec;
+
   forces.adsorption2ForceVec[i] = adsorption2ForceVec;
   forces.aggregation2ForceVec[i] = aggregation2ForceVec;
   forces.entropy2ForceVec[i] = entropy2ForceVec;
@@ -312,6 +318,7 @@ void System::computeGeometricForces(size_t i) {
   forces.adsorptionForce[i] = forces.ontoNormal(adsorptionForceVec, i);
   forces.aggregationForce[i] = forces.ontoNormal(aggregationForceVec, i);
   forces.entropyForce[i] = forces.ontoNormal(entropyForceVec, i);
+
   forces.adsorption2Force[i] = forces.ontoNormal(adsorption2ForceVec, i);
   forces.aggregation2Force[i] = forces.ontoNormal(aggregation2ForceVec, i);
   forces.entropy2Force[i] = forces.ontoNormal(entropy2ForceVec, i);
@@ -365,6 +372,7 @@ void System::computeSelfAvoidanceForce() {
 }
 
 void System::computeChemicalPotentials(bool protein, bool protein2) {
+  std::cout << "computeChemicalPotentials" << std::endl;
   gcs::VertexData<double> dH0dphi(*mesh, 0);
   gcs::VertexData<double> dKbdphi(*mesh, 0);
   gcs::VertexData<double> dKddphi(*mesh, 0);
@@ -513,6 +521,7 @@ void System::computeChemicalPotentials(bool protein, bool protein2) {
 
 EigenVectorX1d
 System::computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential, gcs::VertexData<double> proteinDensity) {
+  std::cout << "computeInPlaneFluxForm" << std::endl;
   gcs::EdgeData<double> edgeProteinDensity(*mesh, 0);
   for (std::size_t i = 0; i < mesh->nEdges(); ++i) {
     gc::Edge e{mesh->edge(i)};
@@ -525,6 +534,7 @@ System::computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential, gcs::VertexDat
 }
 
 void System::computeDPDForces(double dt) {
+  std::cout << "computeDPDForces" << std::endl;
   toMatrix(forces.dampingForceVec).setZero();
   toMatrix(forces.stochasticForceVec).setZero();
   // std::default_random_engine random_generator;
@@ -691,6 +701,7 @@ void System::addNonconservativeForcing(double timeStep) {
 }
 
 void System::computeConservativeForcing() {
+  std::cout << "computeConservativeForcing" << std::endl;
   // zero all forcing
   forces.mechanicalForceVec.fill({0, 0, 0});
   forces.conservativeForceVec.fill({0, 0, 0});

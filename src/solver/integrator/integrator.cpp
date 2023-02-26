@@ -29,6 +29,7 @@ namespace solver {
 namespace integrator {
 
 double Integrator::getAdaptiveCharacteristicTimeStep() {
+  std::cout << "getAdaptiveCharacteristicTimeStep" << std::endl;
   double currentMinimumSize = system.vpg->edgeLengths.raw().minCoeff();
   double currentMaximumForce =
       system.parameters.variation.isShapeVariation
@@ -57,7 +58,7 @@ double Integrator::backtrack(
     Eigen::Matrix<double, Eigen::Dynamic, 3> &&positionDirection,
     Eigen::Matrix<double, Eigen::Dynamic, 1> &chemicalDirection, double rho,
     double c1) {
-
+  std::cout << "backtrack" << std::endl;
   // cache energy of the last time step
   const Energy previousE = system.energy;
 
@@ -160,7 +161,7 @@ double Integrator::backtrack(
 double Integrator::chemicalBacktrack(
     Eigen::Matrix<double, Eigen::Dynamic, 1> &chemicalDirection, double rho,
     double c1) {
-
+  std::cout << "chemicalBacktrack" << std::endl;
   // cache energy of the last time step
   const Energy previousE = system.energy;
 
@@ -236,10 +237,90 @@ double Integrator::chemicalBacktrack(
   return alpha;
 }
 
+double Integrator::chemical2Backtrack(
+    Eigen::Matrix<double, Eigen::Dynamic, 1> &chemicalDirection, double rho,
+    double c1) {
+  std::cout << "chemical2Backtrack" << std::endl;
+  // cache energy of the last time step
+  const Energy previousE = system.energy;
+
+  // validate the directions
+  double chemicalProjection = 0;
+  chemicalProjection = (system.forces.chemical2Potential.raw().array() *
+                        chemicalDirection.array())
+                           .sum();
+  if (chemicalProjection < 0) {
+    mem3dg_runtime_message("chemical evolution on energy "
+                           "uphill direction!");
+  }
+  // calculate initial energy as reference level
+  gc::VertexData<gc::Vector3> initial_pos(*system.mesh);
+  initial_pos = system.vpg->inputVertexPositions;
+  gc::VertexData<double> initial_protein(*system.mesh,
+                                         system.protein2Density.raw());
+  const double init_time = system.time;
+  // declare variables used in backtracking iterations
+  double alpha = characteristicTimeStep;
+  std::size_t count = 0;
+  std::cout << "chemical2Backtrack1" << std::endl;
+  // zeroth iteration
+  system.protein2Density.raw() += alpha * chemicalDirection;
+  std::cout << "chemical2Backtrack2" << std::endl;
+  system.time += alpha;
+  std::cout << "chemical2Backtrack3" << std::endl;
+  system.updateConfigurations();
+  system.computePotentialEnergy();
+  std::cout << "chemical2Backtrack4" << std::endl;
+  while (true) {
+    // Wolfe condition fulfillment
+    if (system.energy.potentialEnergy <=
+        (previousE.potentialEnergy - c1 * alpha * chemicalProjection)) {
+      break;
+    }
+
+    // limit of backtraking iterations
+    if (alpha < 1e-5 * characteristicTimeStep) {
+      std::cout << "\n(time=" << system.time
+                << ") chemicalBacktrack: line search failure! Simulation "
+                   "stopped."
+                << std::endl;
+      system.backtraceEnergyGrowth(alpha, previousE);
+      // recover the initial configuration
+      system.time = init_time;
+      system.protein2Density = initial_protein;
+      system.vpg->inputVertexPositions = initial_pos;
+      system.testConservativeForcing(alpha);
+      system.testConservativeForcing(characteristicTimeStep);
+      EXIT = true;
+      SUCCESS = false;
+      break;
+    }
+    // backtracking time step
+    alpha *= rho;
+    system.protein2Density.raw() =
+        initial_protein.raw() + alpha * chemicalDirection;
+    system.time = init_time + alpha;
+    system.updateConfigurations();
+    system.computePotentialEnergy();
+
+    // count the number of iterations
+    count++;
+  }
+
+  // recover the initial configuration
+  system.time = init_time;
+  system.protein2Density = initial_protein;
+  system.vpg->inputVertexPositions = initial_pos;
+  system.updateConfigurations();
+  system.computePotentialEnergy();
+  return alpha;
+  std::cout << "chemical2Backtrack end" << std::endl;
+}
+
 double Integrator::mechanicalBacktrack(
     Eigen::Matrix<double, Eigen::Dynamic, 3> &&positionDirection, double rho,
     double c1) {
-
+  std::cout << "mechanicalBacktrack" << std::endl;
   // cache energy of the last time step
   const Energy previousE = system.energy;
 
@@ -322,6 +403,7 @@ double Integrator::mechanicalBacktrack(
 
 void Integrator::saveData(bool ifOutputTrajFile, bool ifOutputMeshFile,
                           bool ifPrintToConsole) {
+  std::cout << "saveData" << std::endl;
   // print in-progress information in the console
   if (ifPrintToConsole) {
     std::cout

@@ -348,6 +348,12 @@ bool System::testConservativeForcing(const double timeStep) {
                      energy.adsorptionEnergy, "adsorptionForceVec",
                      "adsorptionEnergy") &&
       SUCCESS;
+
+  SUCCESS =
+      testMechanical(forces.adsorption2ForceVec, previousEnergy.adsorption2Energy,
+                     energy.adsorption2Energy, "adsorption2ForceVec",
+                     "adsorption2Energy") &&
+      SUCCESS;
   SUCCESS =
       testChemical(forces.adsorptionPotential, previousEnergy.adsorptionEnergy,
                    energy.adsorptionEnergy, "adsorptionPotential",
@@ -484,6 +490,9 @@ bool System::checkFiniteness() {
       }
       if (!std::isfinite(toMatrix(forces.adsorptionForceVec).norm())) {
         mem3dg_runtime_message("Adsorption force is not finite!");
+      }
+      if (!std::isfinite(toMatrix(forces.adsorption2ForceVec).norm())) {
+        mem3dg_runtime_message("Adsorption2 force is not finite!");
       }
       if (!std::isfinite(toMatrix(forces.aggregationForceVec).norm())) {
         mem3dg_runtime_message("Aggregation force is not finite!");

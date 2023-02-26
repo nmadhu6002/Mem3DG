@@ -861,6 +861,20 @@ PYBIND11_MODULE(_core, pymem3dg) {
              R"delim(
         System constructor with Matrices 
       )delim");
+
+// Protein2density
+  system.def(py::init<EigenVectorX3sr &, EigenVectorX3dr &,
+                      EigenVectorX1d &, EigenVectorX1d &,
+                      EigenVectorX3dr &, Parameters &, double>(),
+             py::arg("topologyMatrix"), py::arg("vertexMatrix"),
+             py::arg("proteinDensity"),
+             py::arg("protein2Density"),
+             py::arg("velocity"),
+             py::arg("parameters"), py::arg("time") = 0,
+             R"delim(
+        System constructor with Matrices 
+      )delim");
+
   system.def(
       py::init<EigenVectorX3sr &, EigenVectorX3dr &, Parameters &, double>(),
       py::arg("topologyMatrix"), py::arg("vertexMatrix"), py::arg("parameters"),
