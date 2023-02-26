@@ -280,11 +280,22 @@ public:
   // =======       NetCDF Files     ========
   // =======================================
 #ifdef MEM3DG_WITH_NETCDF
+#if 0
   System(std::string trajFile, int startingFrame, Parameters &p)
-      : System(readTrajFile(trajFile, startingFrame), p){};
+      : System(readTrajFile(trajFile, startingFrame), p){
+                std::cout << "15" << std::endl;
+      };
+#endif
+
+  System(std::string trajFile, int startingFrame, Parameters &p)
+      : System(readTrajFile2(trajFile, startingFrame), p){
+                std::cout << "15-N" << std::endl;
+      };
 
   System(std::string trajFile, int startingFrame)
-      : System(readTrajFile(trajFile, startingFrame)){};
+      : System(readTrajFile(trajFile, startingFrame)){
+                std::cout << "16" << std::endl;
+      };
 
 #endif
 
@@ -304,6 +315,22 @@ public:
                std::get<4>(initialConditionsTuple), p,
                std::get<5>(initialConditionsTuple)){
                 std::cout << "21" << std::endl;
+               };
+
+  System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
+                    std::unique_ptr<gcs::VertexPositionGeometry>,
+                    std::unique_ptr<gcs::VertexPositionGeometry>,
+                    EigenVectorX1d, EigenVectorX1d, EigenVectorX3dr, double>
+             initialConditionsTuple,
+         Parameters &p)
+      : System(std::move(std::get<0>(initialConditionsTuple)),
+               std::move(std::get<1>(initialConditionsTuple)),
+               std::move(std::get<2>(initialConditionsTuple)),
+               std::get<3>(initialConditionsTuple),
+               std::get<4>(initialConditionsTuple),
+               std::get<5>(initialConditionsTuple), p,
+               std::get<6>(initialConditionsTuple)){
+                std::cout << "21-N" << std::endl;
                };
 
   System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
@@ -432,12 +459,34 @@ public:
   System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
          std::unique_ptr<gcs::VertexPositionGeometry> ptrvpg_,
          std::unique_ptr<gcs::VertexPositionGeometry> ptrrefvpg_,
+         EigenVectorX1d &proteinDensity_, EigenVectorX1d &protein2Density_,
+         EigenVectorX3dr &velocity_, Parameters &p, double time_ = 0)
+      : System(std::move(ptrmesh_), std::move(ptrvpg_), std::move(ptrrefvpg_),
+               proteinDensity_, protein2Density_, velocity_, time_) {
+    parameters = p;
+    std::cout << "40-N" << std::endl;
+  }
+
+  System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
+         std::unique_ptr<gcs::VertexPositionGeometry> ptrvpg_,
+         std::unique_ptr<gcs::VertexPositionGeometry> ptrrefvpg_,
          EigenVectorX1d &proteinDensity_, EigenVectorX3dr &velocity_,
          double time_ = 0)
       : System(std::move(ptrmesh_), std::move(ptrvpg_), proteinDensity_,
                velocity_, time_) {
     refVpg = std::move(ptrrefvpg_);
     std::cout << "41" << std::endl;
+  }
+
+  System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
+         std::unique_ptr<gcs::VertexPositionGeometry> ptrvpg_,
+         std::unique_ptr<gcs::VertexPositionGeometry> ptrrefvpg_,
+         EigenVectorX1d &proteinDensity_, EigenVectorX1d &protein2Density_,
+         EigenVectorX3dr &velocity_, double time_ = 0)
+      : System(std::move(ptrmesh_), std::move(ptrvpg_), proteinDensity_,
+               protein2Density_, velocity_, time_) {
+    refVpg = std::move(ptrrefvpg_);
+    std::cout << "41-N" << std::endl;
   }
 
   System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
@@ -624,6 +673,11 @@ public:
              std::unique_ptr<gcs::VertexPositionGeometry>, EigenVectorX1d,
              EigenVectorX3dr, double>
   readTrajFile(std::string trajFile, int startingFrame);
+  std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
+             std::unique_ptr<gcs::VertexPositionGeometry>,
+             std::unique_ptr<gcs::VertexPositionGeometry>, EigenVectorX1d, 
+             EigenVectorX1d, EigenVectorX3dr, double>
+  readTrajFile2(std::string trajFile, int startingFrame);
 #endif
 
   // ==========================================================

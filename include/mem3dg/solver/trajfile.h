@@ -91,6 +91,7 @@ public:
     meancurve_var = fd->getVar(MEANCURVE_VAR);
     gausscurve_var = fd->getVar(GAUSSCURVE_VAR);
     phi_var = fd->getVar(PHI_VAR);
+    phi2_var = fd->getVar(PHI_VAR);
     sponcurve_var = fd->getVar(SPONCURVE_VAR);
     chempotential_var = fd->getVar(CHEMPOTENTIAL_VAR);
     physforce_var = fd->getVar(PHYSFORCE_VAR);
@@ -179,6 +180,10 @@ public:
     phi_var = fd->addVar(PHI_VAR, netCDF::ncDouble,
                                 {frame_dim, nvertices_dim});
     phi_var.putAtt(UNITS, LEN_UNITS + "^(-2)");
+
+    phi2_var = fd->addVar(PHI2_VAR, netCDF::ncDouble,
+                                {frame_dim, nvertices_dim});
+    phi2_var.putAtt(UNITS, LEN_UNITS + "^(-2)");
 
     meancurve_var =
         fd->addVar(MEANCURVE_VAR, netCDF::ncDouble, {frame_dim, nvertices_dim});
@@ -608,6 +613,7 @@ private:
   nc::NcVar angle_var;
   nc::NcVar vel_var;
   nc::NcVar phi_var;
+  nc::NcVar phi2_var;
   nc::NcVar meancurve_var;
   nc::NcVar gausscurve_var;
   nc::NcVar sponcurve_var;

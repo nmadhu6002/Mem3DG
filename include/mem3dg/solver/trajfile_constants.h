@@ -87,6 +87,8 @@ static const std::string MEANCURVE_VAR = "meancurvature";
 static const std::string GAUSSCURVE_VAR = "gausscurvature";
 /// Name of the protein density data
 static const std::string PHI_VAR = "proteindensity";
+/// Name of the protein2 density data
+static const std::string PHI2_VAR = "protein2density";
 /// Name of the spontaneous curvature data
 static const std::string SPONCURVE_VAR = "sponcurvature";
 /// Name of the external pressure data

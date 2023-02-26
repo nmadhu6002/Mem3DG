@@ -29,7 +29,7 @@ namespace solver {
 namespace integrator {
 
 double Integrator::getAdaptiveCharacteristicTimeStep() {
-  std::cout << "getAdaptiveCharacteristicTimeStep" << std::endl;
+  // std::cout << "getAdaptiveCharacteristicTimeStep" << std::endl;
   double currentMinimumSize = system.vpg->edgeLengths.raw().minCoeff();
   double currentMaximumForce =
       system.parameters.variation.isShapeVariation
@@ -58,7 +58,7 @@ double Integrator::backtrack(
     Eigen::Matrix<double, Eigen::Dynamic, 3> &&positionDirection,
     Eigen::Matrix<double, Eigen::Dynamic, 1> &chemicalDirection, double rho,
     double c1) {
-  std::cout << "backtrack" << std::endl;
+  // std::cout << "backtrack" << std::endl;
   // cache energy of the last time step
   const Energy previousE = system.energy;
 
@@ -161,7 +161,7 @@ double Integrator::backtrack(
 double Integrator::chemicalBacktrack(
     Eigen::Matrix<double, Eigen::Dynamic, 1> &chemicalDirection, double rho,
     double c1) {
-  std::cout << "chemicalBacktrack" << std::endl;
+  // std::cout << "chemicalBacktrack" << std::endl;
   // cache energy of the last time step
   const Energy previousE = system.energy;
 
@@ -240,7 +240,7 @@ double Integrator::chemicalBacktrack(
 double Integrator::chemical2Backtrack(
     Eigen::Matrix<double, Eigen::Dynamic, 1> &chemicalDirection, double rho,
     double c1) {
-  std::cout << "chemical2Backtrack" << std::endl;
+  // std::cout << "chemical2Backtrack" << std::endl;
   // cache energy of the last time step
   const Energy previousE = system.energy;
 
@@ -262,15 +262,15 @@ double Integrator::chemical2Backtrack(
   // declare variables used in backtracking iterations
   double alpha = characteristicTimeStep;
   std::size_t count = 0;
-  std::cout << "chemical2Backtrack1" << std::endl;
+  // std::cout << "chemical2Backtrack1" << std::endl;
   // zeroth iteration
   system.protein2Density.raw() += alpha * chemicalDirection;
-  std::cout << "chemical2Backtrack2" << std::endl;
+  // std::cout << "chemical2Backtrack2" << std::endl;
   system.time += alpha;
-  std::cout << "chemical2Backtrack3" << std::endl;
+  // std::cout << "chemical2Backtrack3" << std::endl;
   system.updateConfigurations();
   system.computePotentialEnergy();
-  std::cout << "chemical2Backtrack4" << std::endl;
+  // std::cout << "chemical2Backtrack4" << std::endl;
   while (true) {
     // Wolfe condition fulfillment
     if (system.energy.potentialEnergy <=
@@ -314,13 +314,13 @@ double Integrator::chemical2Backtrack(
   system.updateConfigurations();
   system.computePotentialEnergy();
   return alpha;
-  std::cout << "chemical2Backtrack end" << std::endl;
+  // std::cout << "chemical2Backtrack end" << std::endl;
 }
 
 double Integrator::mechanicalBacktrack(
     Eigen::Matrix<double, Eigen::Dynamic, 3> &&positionDirection, double rho,
     double c1) {
-  std::cout << "mechanicalBacktrack" << std::endl;
+  // std::cout << "mechanicalBacktrack" << std::endl;
   // cache energy of the last time step
   const Energy previousE = system.energy;
 
@@ -403,7 +403,7 @@ double Integrator::mechanicalBacktrack(
 
 void Integrator::saveData(bool ifOutputTrajFile, bool ifOutputMeshFile,
                           bool ifPrintToConsole) {
-  std::cout << "saveData" << std::endl;
+  // std::cout << "saveData" << std::endl;
   // print in-progress information in the console
   if (ifPrintToConsole) {
     std::cout
@@ -517,6 +517,7 @@ void Integrator::saveMutableNetcdfData() {
   mutableTrajFile.writeRefCoords(frame, *system.refVpg);
   mutableTrajFile.writeTopology(frame, *system.mesh);
   mutableTrajFile.writeProteinDensity(frame, system.proteinDensity);
+  mutableTrajFile.writeProtein2Density(frame, system.protein2Density);
   mutableTrajFile.sync();
 }
 #endif

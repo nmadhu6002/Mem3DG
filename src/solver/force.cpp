@@ -43,9 +43,10 @@ void System::computeGeometricForces(gcs::Vertex &v) {
 }
 
 void System::computeGeometricForces(size_t i) {
-  if (i % 30 == 0){
-    std::cout << "computeGeometricForces" << std::endl;
-  }
+  // if (i % 30 == 0){
+  //   std::cout << "computeGeometricForces" << std::endl;
+  // }
+  // std::cout << "computeGeometricForces" << std::endl;
   gc::Vertex v{mesh->vertex(i)};
   gc::Vector3 spontaneousCurvatureForceVec{0, 0, 0};
   gc::Vector3 spontaneousCurvatureForceVec_areaGrad{0, 0, 0};
@@ -66,7 +67,9 @@ void System::computeGeometricForces(size_t i) {
   gc::Vector3 entropy2ForceVec{0, 0, 0};
   double Hi = vpg->vertexMeanCurvatures[i] / vpg->vertexDualAreas[i];
   double KGi = vpg->vertexGaussianCurvatures[i];
+  // std::cout << "computeGeometricForces2" << std::endl;
   double H0i = H0[i];
+  // std::cout << "computeGeometricForces3" << std::endl;
   double Kbi = Kb[i];
   double Kdi = Kd[i];
   double proteinDensityi = proteinDensity[i];
@@ -97,7 +100,7 @@ void System::computeGeometricForces(size_t i) {
     bool interiorHalfedge = he.isInterior();
     bool boundaryEdge = he.edge().isBoundary();
     bool boundaryNeighborVertex = he.next().vertex().isBoundary();
-
+    // std::cout << "computeGeometricForces3" << std::endl;
     // compute fundamental variational vectors
     gc::Vector3 areaGrad = 2 * computeHalfedgeMeanCurvatureVector(*vpg, he);
     gc::Vector3 gaussVec = computeHalfedgeGaussianCurvatureVector(*vpg, he);
@@ -128,7 +131,7 @@ void System::computeGeometricForces(size_t i) {
                   protein2Density, he) /
                   vpg->faceAreas[fID]
             : gc::Vector3{0.0, 0.0, 0.0};
-
+    // std::cout << "computeGeometricForces4" << std::endl;
     // Assemble to forces
     if (Kbi != 0 || Kbj != 0) { // spontaneous curvature force
       spontaneousCurvatureForceVec_schlafliVec -=
@@ -168,7 +171,7 @@ void System::computeGeometricForces(size_t i) {
                   computeCornerAngleVariation(he.twin().corner(), he.vertex());
         }
       }
-      std::cout << "computeGeometricForces3" << std::endl;
+      // std::cout << "computeGeometricForces5" << std::endl;
       // deviatoricCurvatureForceVec_mean -=
       //     (Kdi * Hi + Kdj * Hj) * gaussVec +
       //     (Kdi * (-Hi * Hi) / 3 + Kdj * (-Hj * Hj) * 2 / 3) * areaGrad +
@@ -372,7 +375,7 @@ void System::computeSelfAvoidanceForce() {
 }
 
 void System::computeChemicalPotentials(bool protein, bool protein2) {
-  std::cout << "computeChemicalPotentials" << std::endl;
+  // std::cout << "computeChemicalPotentials" << std::endl;
   gcs::VertexData<double> dH0dphi(*mesh, 0);
   gcs::VertexData<double> dKbdphi(*mesh, 0);
   gcs::VertexData<double> dKddphi(*mesh, 0);
@@ -521,7 +524,7 @@ void System::computeChemicalPotentials(bool protein, bool protein2) {
 
 EigenVectorX1d
 System::computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential, gcs::VertexData<double> proteinDensity) {
-  std::cout << "computeInPlaneFluxForm" << std::endl;
+  // std::cout << "computeInPlaneFluxForm" << std::endl;
   gcs::EdgeData<double> edgeProteinDensity(*mesh, 0);
   for (std::size_t i = 0; i < mesh->nEdges(); ++i) {
     gc::Edge e{mesh->edge(i)};
@@ -534,7 +537,7 @@ System::computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential, gcs::VertexDat
 }
 
 void System::computeDPDForces(double dt) {
-  std::cout << "computeDPDForces" << std::endl;
+  // std::cout << "computeDPDForces" << std::endl;
   toMatrix(forces.dampingForceVec).setZero();
   toMatrix(forces.stochasticForceVec).setZero();
   // std::default_random_engine random_generator;
@@ -701,7 +704,7 @@ void System::addNonconservativeForcing(double timeStep) {
 }
 
 void System::computeConservativeForcing() {
-  std::cout << "computeConservativeForcing" << std::endl;
+  // std::cout << "computeConservativeForcing" << std::endl;
   // zero all forcing
   forces.mechanicalForceVec.fill({0, 0, 0});
   forces.conservativeForceVec.fill({0, 0, 0});

@@ -643,6 +643,13 @@ PYBIND11_MODULE(_core, pymem3dg) {
       R"delim(
           get the chemical Potential
       )delim");
+  forces.def(
+      "getChemical2Potential",
+      [](Forces &s) { return s.chemical2Potential.raw(); },
+      py::return_value_policy::copy,
+      R"delim(
+          get the chemical Potential
+      )delim");
 
 #pragma endregion forces
 
@@ -1112,6 +1119,20 @@ PYBIND11_MODULE(_core, pymem3dg) {
   system.def(
       "getProteinRateOfChange",
       [](System &s) { return s.proteinRateOfChange.raw(); },
+      py::return_value_policy::copy,
+      R"delim(
+          get the protein rate of change
+      )delim");
+
+  system.def(
+      "getProtein2Density", [](System &s) { return s.protein2Density.raw(); },
+      py::return_value_policy::copy,
+      R"delim(
+          get the protein Density
+      )delim");
+  system.def(
+      "getProtein2RateOfChange",
+      [](System &s) { return s.protein2RateOfChange.raw(); },
       py::return_value_policy::copy,
       R"delim(
           get the protein rate of change

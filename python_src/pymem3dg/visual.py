@@ -831,6 +831,7 @@ def animate(
     entropyForce: bool = True,
     springForce: bool = True,
     chemicalPotential: bool = True,
+    chemical2Potential: bool = True,
     spontaneousCurvaturePotential: bool = True,
     aggregationPotential: bool = True,
     dirichletPotential: bool = True,
@@ -890,7 +891,6 @@ def animate(
     isPlay = False
     transparency = 1
     isRecord = False
-
     def show(trajNc):
         nonlocal currFrameInd, time, isPointwiseValue, isForceVec, isFluxForm, showPotential, showForce, showBasics
         frame = frames[currFrameInd]
@@ -903,11 +903,14 @@ def animate(
         psmesh = ps.register_surface_mesh(
             "mesh", vertex, face, transparency=transparency, smooth_shade=True
         )
-
+        print("hello")
         if hasParameters:
+            print("hello1")
             system = dg.System(trajNc, frame, parameters)
+            print("hello2")
             system.initialize(nMutation=0, ifMute=True)
             system.computeConservativeForcing()
+            print("hello3")
             system.addNonconservativeForcing()
         else:
             system = dg.System(trajNc, frame)
@@ -918,6 +921,7 @@ def animate(
         # Add Quantities
         vertexDualAreas = system.getVertexDualAreas()
         proteinDensity = system.getProteinDensity()
+        protein2Density = system.getProtein2Density()
         if showBasics:
             psmesh.add_vector_quantity("velocity", velocity)
             if isPointwiseValue:
@@ -928,11 +932,25 @@ def animate(
                     cmap="coolwarm",
                     enabled=True,
                 )
+                psmesh.add_scalar_quantity(
+                    "protein2Density",
+                    protein2Density,
+                    vminmax=(-1, 1),  # keep the center (white) at 0
+                    cmap="coolwarm",
+                    enabled=True,
+                )
             else:
                 proteinDensity = proteinDensity * vertexDualAreas
                 psmesh.add_scalar_quantity(
                     "proteinDensity",
                     proteinDensity,
+                    enabled=True,
+                    cmap="viridis",
+                )
+                protein2Density = protein2Density * vertexDualAreas
+                psmesh.add_scalar_quantity(
+                    "protein2Density",
+                    protein2Density,
                     enabled=True,
                     cmap="viridis",
                 )
@@ -958,8 +976,17 @@ def animate(
 
         def computeProteinRateOfChange(potential: npt.NDArray[np.float64]):
             d0T = system.getVertexAdjacencyMatrix().T
-            flux = system.computeInPlaneFluxForm(potential)
+            flux = system.computeInPlaneFluxForm(potential, proteinDensity)
             rateOfChange = parameters.proteinMobility * d0T @ flux
+            if not np.all(rateOfChange == 0):
+                if isPointwiseValue:
+                    rateOfChange = rateOfChange / vertexDualAreas
+            return rateOfChange
+        
+        def computeProtein2RateOfChange(potential: npt.NDArray[np.float64]):
+            d0T = system.getVertexAdjacencyMatrix().T
+            flux = system.computeInPlaneFluxForm(potential, protein2Density)
+            rateOfChange = parameters.protein2Mobility * d0T @ flux
             if not np.all(rateOfChange == 0):
                 if isPointwiseValue:
                     rateOfChange = rateOfChange / vertexDualAreas
@@ -985,7 +1012,7 @@ def animate(
 
         def addPotential(potential: npt.NDArray[np.float64], key: str):
             if isFluxForm:
-                inPlaneFluxForm = system.computeInPlaneFluxForm(potential)
+                inPlaneFluxForm = system.computeInPlaneFluxForm(potential, proteinDensity)
                 if not np.all(inPlaneFluxForm == 0):
                     psmesh.add_one_form_vector_quantity(
                         key,
@@ -995,6 +1022,38 @@ def animate(
             else:
                 if parameters.variation.isProteinConservation:
                     rateOfChange = computeProteinRateOfChange(potential)
+                    absMax = np.max(abs(rateOfChange))
+                    if not np.all(rateOfChange == 0):
+                        psmesh.add_scalar_quantity(
+                            key,
+                            rateOfChange,
+                            cmap="coolwarm",
+                            vminmax=(-absMax, absMax),
+                        )
+                else:
+                    if not np.all(potential == 0):
+                        if not isPointwiseValue:
+                            potential = vertexDualAreas * potential
+                        absMax = np.max(abs(potential))
+                        psmesh.add_scalar_quantity(
+                            key,
+                            potential,
+                            cmap="coolwarm",
+                            vminmax=(-absMax, absMax),
+                        )
+        
+        def addPotential2(potential: npt.NDArray[np.float64], key: str):
+            if isFluxForm:
+                inPlaneFluxForm = system.computeInPlaneFluxForm(potential, protein2Density)
+                if not np.all(inPlaneFluxForm == 0):
+                    psmesh.add_one_form_vector_quantity(
+                        key,
+                        inPlaneFluxForm,
+                        system.getPolyscopeEdgeOrientations(),
+                    )
+            else:
+                if parameters.variation.isProtein2Conservation:
+                    rateOfChange = computeProtein2RateOfChange(potential)
                     absMax = np.max(abs(rateOfChange))
                     if not np.all(rateOfChange == 0):
                         psmesh.add_scalar_quantity(
@@ -1060,6 +1119,10 @@ def animate(
                 if chemicalPotential:
                     addPotential(
                         system.getForces().getChemicalPotential(), "chemicalPotential"
+                    )
+                if chemical2Potential:
+                    addPotential(
+                        system.getForces().getChemical2Potential(), "chemical2Potential"
                     )
                 if spontaneousCurvaturePotential:
                     addPotential(

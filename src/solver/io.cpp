@@ -148,6 +148,41 @@ System::readTrajFile(std::string trajFile, int startingFrame) {
   return std::make_tuple(std::move(mesh), std::move(vpg), std::move(refVpg),
                          initialProteinDensity, initialVelocity, initialTime);
 }
+
+std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
+           std::unique_ptr<gcs::VertexPositionGeometry>,
+           std::unique_ptr<gcs::VertexPositionGeometry>, EigenVectorX1d,
+           EigenVectorX1d, EigenVectorX3dr, double>
+System::readTrajFile2(std::string trajFile, int startingFrame) {
+
+  // Declare pointers to mesh / geometry objects
+  std::unique_ptr<gcs::ManifoldSurfaceMesh> mesh;
+  std::unique_ptr<gcs::VertexPositionGeometry> vpg;
+  std::unique_ptr<gcs::VertexPositionGeometry> refVpg;
+  double initialTime;
+  EigenVectorX3dr initialVelocity;
+  EigenVectorX1d initialProteinDensity;
+  EigenVectorX1d initialProtein2Density;
+
+  MutableTrajFile fd = MutableTrajFile::openReadOnly(trajFile);
+  fd.getNcFrame(startingFrame);
+  std::tie(mesh, vpg) = gcs::makeManifoldSurfaceMeshAndGeometry(
+      fd.getCoords(startingFrame), fd.getTopology(startingFrame));
+  const EigenVectorX3dr refVertexPositions = fd.getRefCoords(startingFrame);
+  refVpg =
+      std::make_unique<gcs::VertexPositionGeometry>(*mesh, refVertexPositions);
+
+  // Map continuation variables
+  initialTime = fd.getTime(startingFrame);
+  initialVelocity = fd.getVelocity(startingFrame);
+  initialProteinDensity = fd.getProteinDensity(startingFrame);
+  initialProtein2Density = fd.getProtein2Density(startingFrame);
+  // F.toMatrix(vel_protein) = fd.getProteinVelocity(startingFrame);
+
+  return std::make_tuple(std::move(mesh), std::move(vpg), std::move(refVpg),
+                         initialProteinDensity, initialProtein2Density,
+                         initialVelocity, initialTime);
+}
 #endif
 
 std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,

@@ -180,6 +180,7 @@ public:
     coord_var = traj_group.getVar(COORD_VAR);
     refcoord_var = traj_group.getVar(REFCOORD_VAR);
     phi_var = traj_group.getVar(PHI_VAR);
+    phi2_var = traj_group.getVar(PHI2_VAR);
     vel_var = traj_group.getVar(VEL_VAR);
     extF_var = traj_group.getVar(EXTF_VAR);
   }
@@ -254,6 +255,7 @@ public:
     coord_var = nc::NcVar{};
     refcoord_var = nc::NcVar{};
     phi_var = nc::NcVar{};
+    phi2_var = nc::NcVar{};
     vel_var = nc::NcVar{};
     extF_var = nc::NcVar{};
     filename = "";
@@ -402,6 +404,27 @@ public:
    */
   EigenVectorX1d getProteinDensity(const std::size_t idx) {
     return getVar1d<double>(phi_var, idx);
+  }
+
+  /**
+   * @brief Write the protein 2 density for a frame
+   *
+   * @param idx   Index of the frame
+   * @param data  Vertex position geometry
+   */
+  void writeProtein2Density(const std::size_t idx,
+                           const gc::MeshData<gc::Vertex, double> &data) {
+    writeVar(phi2_var, idx, data);
+  }
+
+  /**
+   * @brief Get the protein 2 density of a given frame
+   *
+   * @param idx               Index of the frame
+   * @return EigenVectorX3dr  Coordinates data
+   */
+  EigenVectorX1d getProtein2Density(const std::size_t idx) {
+    return getVar1d<double>(phi2_var, idx);
   }
 
   /**
@@ -704,6 +727,8 @@ private:
     // refcoord_var.setCompression(true, true, compression_level);
     phi_var = traj_group.addVar(PHI_VAR, double_array_t, {frame_dim});
     // phi_var.setCompression(true, true, compression_level);
+    phi2_var = traj_group.addVar(PHI2_VAR, double_array_t, {frame_dim});
+    // phi2_var.setCompression(true, true, compression_level);
     vel_var = traj_group.addVar(VEL_VAR, double_array_t, {frame_dim});
     // vel_var.setCompression(true, true, compression_level);
     extF_var = traj_group.addVar(EXTF_VAR, double_array_t, {frame_dim});
@@ -734,6 +759,8 @@ private:
   nc::NcVar refcoord_var;
   /// Vlen variable for protein density
   nc::NcVar phi_var;
+  /// Vlen variable for protein 2 density
+  nc::NcVar phi2_var;
   /// Vlen variable for velocities
   nc::NcVar vel_var;
   /// Vlen variable for external forces

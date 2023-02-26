@@ -35,7 +35,7 @@ namespace integrator {
 namespace gc = ::geometrycentral;
 
 bool Euler::integrate() {
-  std::cout << "integrate" << std::endl;
+  // std::cout << "integrate" << std::endl;
   if (ifDisableIntegrate)
     mem3dg_runtime_error("integrate() is disabled for current construction!");
 
@@ -57,9 +57,9 @@ bool Euler::integrate() {
 
   // time integration loop
   const double avoidStrength = system.parameters.selfAvoidance.mu;
-  unsigned count = 0;
+  // unsigned count = 0;
   for (;;) {
-    std::cout << count++  << std::endl;
+    // std::cout << count++  << std::endl;
     // turn on/off self-avoidance; outside status-march-cycle; before savedata
     // to write selfAvoidance
     if (avoidStrength != 0) {
@@ -164,7 +164,7 @@ void Euler::checkParameters() {
 }
 
 void Euler::status() {
-  std::cout << "status" << std::endl;
+  // std::cout << "status" << std::endl;
   // compute summerized forces
   system.computeConservativeForcing();
   system.addNonconservativeForcing(timeStep);
@@ -198,7 +198,7 @@ void Euler::status() {
 }
 
 void Euler::march() {
-  std::cout << "march" << std::endl;
+  // std::cout << "march" << std::endl;
   // compute velocity, which are independent of time
   system.velocity = system.forces.mechanicalForceVec;
   system.mechErrorNorm = (toMatrix(system.velocity).array() *
@@ -266,7 +266,7 @@ void Euler::march() {
 
   // recompute cached values
   system.updateConfigurations();
-  std::cout << "march end" << std::endl;
+  // std::cout << "march end" << std::endl;
 }
 } // namespace integrator
 } // namespace solver

@@ -139,7 +139,7 @@ void System::updateReferenceConfigurations() {
 }
 
 void System::updateConfigurations() {
-std::cout << "updateConfigurations" << std::endl;
+// std::cout << "updateConfigurations" << std::endl;
   // refresh cached quantities after regularization
   vpg->refreshQuantities();
 
@@ -213,7 +213,7 @@ std::cout << "updateConfigurations" << std::endl;
                                         (surfaceArea - parameters.tension.At) /
                                         parameters.tension.At +
                                     parameters.tension.lambdaSG;
-  std::cout << "updateConfigurations end" << std::endl;
+  // std::cout << "updateConfigurations end" << std::endl;
 }
 } // namespace solver
 } // namespace mem3dg

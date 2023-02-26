@@ -136,7 +136,7 @@ void System::computePressureEnergy() {
 // }
 
 void System::computeAdsorptionEnergy(bool protein, bool protein2) {
-  std::cout << "computeAdsorptionEnergy" << std::endl;
+  // std::cout << "computeAdsorptionEnergy" << std::endl;
   if (protein)
     energy.adsorptionEnergy =
         parameters.adsorption.epsilon *
@@ -148,7 +148,7 @@ void System::computeAdsorptionEnergy(bool protein, bool protein2) {
 }
 
 void System::computeAggregationEnergy(bool protein, bool protein2) {
-  std::cout << "computeAggregationEnergy" << std::endl;
+  // std::cout << "computeAggregationEnergy" << std::endl;
   if (protein)
     energy.aggregationEnergy =
         parameters.aggregation.chi *
@@ -169,7 +169,7 @@ void System::computeAggregationEnergy(bool protein, bool protein2) {
 }
 
 void System::computeEntropyEnergy(bool protein, bool protein2) {
-  std::cout << "computeEntropyEnergy" << std::endl;
+  // std::cout << "computeEntropyEnergy" << std::endl;
   if (protein)
     energy.entropyEnergy =
         parameters.entropy.xi *
@@ -195,7 +195,7 @@ void System::computeEntropyEnergy(bool protein, bool protein2) {
 }
 
 void System::computeProteinInteriorPenalty(bool protein, bool protein2) {
-  std::cout << "computeProteinInteriorPenalty" << std::endl;
+  // std::cout << "computeProteinInteriorPenalty" << std::endl;
   // interior method to constrain protein density to remain from 0 to 1
   if (protein)
     energy.proteinInteriorPenalty =
@@ -248,7 +248,7 @@ void System::computeSelfAvoidanceEnergy() {
 }
 
 void System::computeDirichletEnergy(bool protein, bool protein2) {
-  std::cout << "computeDirichletEnergy" << std::endl;
+  // std::cout << "computeDirichletEnergy" << std::endl;
   if (false) {
     mem3dg_runtime_error("computeDirichletEnergy: out of date implementation, "
                          "shouldn't be called!");
@@ -286,7 +286,7 @@ void System::computeDirichletEnergy(bool protein, bool protein2) {
 }
 
 double System::computePotentialEnergy() {
-  std::cout << "computePotentialEnergy" << std::endl;
+  // std::cout << "computePotentialEnergy" << std::endl;
   // fundamental internal potential energy
   energy.spontaneousCurvatureEnergy = 0;
   energy.deviatoricCurvatureEnergy = 0;
@@ -386,7 +386,7 @@ double System::computeKineticEnergy() {
 }
 
 double System::computeTotalEnergy() {
-  std::cout << "computeTotalEnergy" << std::endl;
+  // std::cout << "computeTotalEnergy" << std::endl;
   computePotentialEnergy();
   computeKineticEnergy();
   if (time == energy.time) {
