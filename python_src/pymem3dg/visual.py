@@ -903,14 +903,14 @@ def animate(
         psmesh = ps.register_surface_mesh(
             "mesh", vertex, face, transparency=transparency, smooth_shade=True
         )
-        print("hello")
+        # print("hello")
         if hasParameters:
-            print("hello1")
+            # print("hello1")
             system = dg.System(trajNc, frame, parameters)
-            print("hello2")
+            # print("hello2")
             system.initialize(nMutation=0, ifMute=True)
             system.computeConservativeForcing()
-            print("hello3")
+            # print("hello3")
             system.addNonconservativeForcing()
         else:
             system = dg.System(trajNc, frame)
@@ -937,7 +937,7 @@ def animate(
                     protein2Density,
                     vminmax=(-1, 1),  # keep the center (white) at 0
                     cmap="coolwarm",
-                    enabled=True,
+                    enabled=False,
                 )
             else:
                 proteinDensity = proteinDensity * vertexDualAreas
@@ -951,7 +951,7 @@ def animate(
                 psmesh.add_scalar_quantity(
                     "protein2Density",
                     protein2Density,
-                    enabled=True,
+                    enabled=False,
                     cmap="viridis",
                 )
             if centerTracker:
@@ -1121,7 +1121,7 @@ def animate(
                         system.getForces().getChemicalPotential(), "chemicalPotential"
                     )
                 if chemical2Potential:
-                    addPotential(
+                    addPotential2(
                         system.getForces().getChemical2Potential(), "chemical2Potential"
                     )
                 if spontaneousCurvaturePotential:

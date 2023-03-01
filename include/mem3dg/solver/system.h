@@ -200,7 +200,7 @@ public:
          EigenVectorX3dr &velocity_, Parameters &p, double time_ = 0)
       : System(readMatrices(topologyMatrix, vertexMatrix, referenceVertexMatrx),
                proteinDensity_, velocity_, p, time_){
-                std::cout << "1" << std::endl;               
+                // std::cout << "1" << std::endl;               
                };
 
   System(EigenVectorX3sr &topologyMatrix, EigenVectorX3dr &vertexMatrix,
@@ -208,7 +208,7 @@ public:
          Parameters &p, double time_ = 0)
       : System(readMatrices(topologyMatrix, vertexMatrix), proteinDensity_,
                velocity_, p, time_){
-                std::cout << "2" << std::endl;
+                // std::cout << "2" << std::endl;
                };
 
 // 2-N
@@ -220,13 +220,13 @@ public:
       : System(readMatrices(topologyMatrix, vertexMatrix), proteinDensity_,
                protein2Density_,
                velocity_, p, time_){
-                std::cout << "2-N" << std::endl;
+                // std::cout << "2-N" << std::endl;
                };
 
   System(EigenVectorX3sr &topologyMatrix, EigenVectorX3dr &vertexMatrix,
          Parameters &p, double time_ = 0)
       : System(readMatrices(topologyMatrix, vertexMatrix), p, time_){
-                std::cout << "3" << std::endl;
+                // std::cout << "3" << std::endl;
       };
 
   System(EigenVectorX3sr &topologyMatrix, EigenVectorX3dr &vertexMatrix,
@@ -234,13 +234,13 @@ public:
          double time_ = 0)
       : System(readMatrices(topologyMatrix, vertexMatrix), proteinDensity_,
                velocity_, time_){
-                std::cout << "4" << std::endl;
+                // std::cout << "4" << std::endl;
                };
 
   System(EigenVectorX3sr &topologyMatrix, EigenVectorX3dr &vertexMatrix,
          double time_ = 0)
       : System(readMatrices(topologyMatrix, vertexMatrix), time_){
-                std::cout << "5" << std::endl;
+                // std::cout << "5" << std::endl;
       };
 
   // =======================================
@@ -251,29 +251,29 @@ public:
          Parameters &p, double time_ = 0)
       : System(readMeshFile(inputMesh, referenceMesh), proteinDensity_,
                velocity_, p, time_){
-                std::cout << "6" << std::endl;
+                // std::cout << "6" << std::endl;
                };
 
   System(std::string inputMesh, EigenVectorX1d &proteinDensity_,
          EigenVectorX3dr &velocity_, Parameters &p, double time_ = 0)
       : System(readMeshFile(inputMesh), proteinDensity_, velocity_, p, time_){
-                std::cout << "7" << std::endl;
+                // std::cout << "7" << std::endl;
       };
 
   System(std::string inputMesh, Parameters &p, double time_ = 0)
       : System(readMeshFile(inputMesh), p, time_){
-                std::cout << "8" << std::endl;
+                // std::cout << "8" << std::endl;
       };
 
   System(std::string inputMesh, EigenVectorX1d &proteinDensity_,
          EigenVectorX3dr &velocity_, double time_ = 0)
       : System(readMeshFile(inputMesh), proteinDensity_, velocity_, time_){
-                std::cout << "9" << std::endl;
+                // std::cout << "9" << std::endl;
       };
 
   System(std::string inputMesh, double time_ = 0)
       : System(readMeshFile(inputMesh), time_){
-                std::cout << "10" << std::endl;
+                // std::cout << "10" << std::endl;
       };
 
   // =======================================
@@ -283,18 +283,18 @@ public:
 #if 0
   System(std::string trajFile, int startingFrame, Parameters &p)
       : System(readTrajFile(trajFile, startingFrame), p){
-                std::cout << "15" << std::endl;
+                // std::cout << "15" << std::endl;
       };
 #endif
 
   System(std::string trajFile, int startingFrame, Parameters &p)
       : System(readTrajFile2(trajFile, startingFrame), p){
-                std::cout << "15-N" << std::endl;
+                // std::cout << "15-N" << std::endl;
       };
 
   System(std::string trajFile, int startingFrame)
       : System(readTrajFile(trajFile, startingFrame)){
-                std::cout << "16" << std::endl;
+                // std::cout << "16" << std::endl;
       };
 
 #endif
@@ -314,7 +314,7 @@ public:
                std::get<3>(initialConditionsTuple),
                std::get<4>(initialConditionsTuple), p,
                std::get<5>(initialConditionsTuple)){
-                std::cout << "21" << std::endl;
+                // std::cout << "21" << std::endl;
                };
 
   System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
@@ -330,7 +330,7 @@ public:
                std::get<4>(initialConditionsTuple),
                std::get<5>(initialConditionsTuple), p,
                std::get<6>(initialConditionsTuple)){
-                std::cout << "21-N" << std::endl;
+                // std::cout << "21-N" << std::endl;
                };
 
   System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
@@ -343,7 +343,7 @@ public:
                std::get<2>(initialConditionsTuple),
                std::get<3>(initialConditionsTuple), p,
                std::get<4>(initialConditionsTuple)){
-                std::cout << "22" << std::endl;
+                // std::cout << "22" << std::endl;
                };
 
   System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
@@ -357,7 +357,7 @@ public:
                std::get<3>(initialConditionsTuple),
                std::get<4>(initialConditionsTuple),
                std::get<5>(initialConditionsTuple)){
-                std::cout << "23" << std::endl;
+                // std::cout << "23" << std::endl;
                };
 
   System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
@@ -369,7 +369,7 @@ public:
                std::get<2>(initialConditionsTuple),
                std::get<3>(initialConditionsTuple),
                std::get<4>(initialConditionsTuple)){
-                std::cout << "24" << std::endl;
+                // std::cout << "24" << std::endl;
                };
 
   System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
@@ -382,7 +382,7 @@ public:
                std::move(std::get<1>(meshVpgTuple)),
                std::move(std::get<2>(meshVpgTuple)), proteinDensity_, velocity_,
                p, time_){
-                std::cout << "25" << std::endl;
+                // std::cout << "25" << std::endl;
                };
 
   System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
@@ -393,7 +393,7 @@ public:
       : System(std::move(std::get<0>(meshVpgTuple)),
                std::move(std::get<1>(meshVpgTuple)), proteinDensity_, velocity_,
                p, time_){
-                std::cout << "26" << std::endl;
+                // std::cout << "26" << std::endl;
                };
 
 // 26-N
@@ -410,7 +410,7 @@ public:
                protein2Density_,               
                velocity_,
                p, time_){
-                std::cout << "26-N" << std::endl;
+                // std::cout << "26-N" << std::endl;
                };
 
   System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
@@ -419,7 +419,7 @@ public:
          Parameters &p, double time_ = 0)
       : System(std::move(std::get<0>(meshVpgTuple)),
                std::move(std::get<1>(meshVpgTuple)), p, time_){
-                std::cout << "27" << std::endl;
+                // std::cout << "27" << std::endl;
                };
 
   System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
@@ -430,7 +430,7 @@ public:
       : System(std::move(std::get<0>(meshVpgTuple)),
                std::move(std::get<1>(meshVpgTuple)), proteinDensity_, velocity_,
                time_){
-                std::cout << "28" << std::endl;
+                // std::cout << "28" << std::endl;
                };
 
   System(std::tuple<std::unique_ptr<gcs::ManifoldSurfaceMesh>,
@@ -439,7 +439,7 @@ public:
          double time_ = 0)
       : System(std::move(std::get<0>(meshVpgTuple)),
                std::move(std::get<1>(meshVpgTuple)), time_){
-                std::cout << "29" << std::endl;
+                // std::cout << "29" << std::endl;
                };
 
   // =======================================
@@ -453,7 +453,7 @@ public:
       : System(std::move(ptrmesh_), std::move(ptrvpg_), std::move(ptrrefvpg_),
                proteinDensity_, velocity_, time_) {
     parameters = p;
-    std::cout << "40" << std::endl;
+    // std::cout << "40" << std::endl;
   }
 
   System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
@@ -464,7 +464,7 @@ public:
       : System(std::move(ptrmesh_), std::move(ptrvpg_), std::move(ptrrefvpg_),
                proteinDensity_, protein2Density_, velocity_, time_) {
     parameters = p;
-    std::cout << "40-N" << std::endl;
+    // std::cout << "40-N" << std::endl;
   }
 
   System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
@@ -475,7 +475,7 @@ public:
       : System(std::move(ptrmesh_), std::move(ptrvpg_), proteinDensity_,
                velocity_, time_) {
     refVpg = std::move(ptrrefvpg_);
-    std::cout << "41" << std::endl;
+    // std::cout << "41" << std::endl;
   }
 
   System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
@@ -486,7 +486,7 @@ public:
       : System(std::move(ptrmesh_), std::move(ptrvpg_), proteinDensity_,
                protein2Density_, velocity_, time_) {
     refVpg = std::move(ptrrefvpg_);
-    std::cout << "41-N" << std::endl;
+    // std::cout << "41-N" << std::endl;
   }
 
   System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
@@ -496,7 +496,7 @@ public:
       : System(std::move(ptrmesh_), std::move(ptrvpg_), proteinDensity_,
                velocity_, time_) {
     parameters = p;
-    std::cout << "42" << std::endl;
+    // std::cout << "42" << std::endl;
   }
 
 // 42-N
@@ -507,7 +507,7 @@ public:
       : System(std::move(ptrmesh_), std::move(ptrvpg_), proteinDensity_,
                protein2Density_, velocity_, time_) {
     parameters = p;
-    std::cout << "42-N" << std::endl;
+    // std::cout << "42-N" << std::endl;
   }
 
   System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
@@ -517,7 +517,7 @@ public:
       : System(std::move(ptrmesh_), std::move(ptrvpg_), time_) {
     proteinDensity.raw() = proteinDensity_;
     toMatrix(velocity) = velocity_;
-    std::cout << "43" << std::endl;
+    // std::cout << "43" << std::endl;
   }
 
 // 43-N
@@ -529,7 +529,8 @@ public:
     proteinDensity.raw() = proteinDensity_;
     protein2Density.raw() = protein2Density_;
     toMatrix(velocity) = velocity_;
-    std::cout << "43-N" << std::endl;
+    // std::cout << "43-N" << std::endl;
+    // std::cout << proteinDensity.raw() << std::endl;
   }
 
   System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
@@ -537,14 +538,14 @@ public:
          double time_ = 0)
       : System(std::move(ptrmesh_), std::move(ptrvpg_), time_) {
     parameters = p;
-    std::cout << "44" << std::endl;
+    // std::cout << "44" << std::endl;
   }
 
   System(std::unique_ptr<gcs::ManifoldSurfaceMesh> ptrmesh_,
          std::unique_ptr<gcs::VertexPositionGeometry> ptrvpg_, double time_ = 0)
       : mesh(std::move(ptrmesh_)), vpg(std::move(ptrvpg_)), forces(*mesh, *vpg),
         time(time_) {
-    std::cout << "45" << std::endl;
+    // std::cout << "45" << std::endl;
 
     refLcrs = gcs::HalfedgeData<double>(*mesh);
     refVpg = vpg->copy();
@@ -555,11 +556,22 @@ public:
     proteinDensityGradient = gcs::FaceData<gc::Vector3>(*mesh, {0, 0, 0});
     velocity = gcs::VertexData<gc::Vector3>(*mesh, {0, 0, 0});
     proteinRateOfChange = gcs::VertexData<double>(*mesh, 0);
+
+    protein2Density = gc::VertexData<double>(*mesh, 1);
+    protein2DensityGradient = gcs::FaceData<gc::Vector3>(*mesh, {0, 0, 0});
+    protein2RateOfChange = gcs::VertexData<double>(*mesh, 0);
+
+    std::cout << "phi2: [" << protein2Density.raw().minCoeff() << ","
+              << proteinDensity.raw().maxCoeff() << "]" << std::endl;
+
     H0 = gcs::VertexData<double>(*mesh);
     Kb = gcs::VertexData<double>(*mesh);
     Kd = gcs::VertexData<double>(*mesh);
 
     chemErrorNorm = 0;
+
+    chem2ErrorNorm = 0;
+
     mechErrorNorm = 0;
 
     geodesicDistance = gcs::VertexData<double>(*mesh, 0);

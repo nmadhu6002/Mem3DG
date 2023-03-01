@@ -76,23 +76,23 @@ void System::checkConfiguration() {
     }
   }
 
-  if (((proteinDensity - proteinDensity[0]).raw().norm() == 0) &&
-      (!parameters.protein.ifPrescribe)) { // homogeneous distribution
-    if (parameters.variation.isProteinVariation) {
-      if (proteinDensity[0] < 0 || proteinDensity[0] > 1)
-        mem3dg_runtime_error("{0<=phi<=1}");
-    } else {
-      if (proteinDensity[0] != 1 || parameters.bending.Kb != 0 ||
-          parameters.dirichlet.eta != 0 || parameters.adsorption.epsilon != 0 ||
-          parameters.aggregation.chi != 0)
-        mem3dg_runtime_message(
-            "For homogenous membrane simulation, good practice is to set "
-            "proteinDensity = 1, Kb = 0, eta  = 0, "
-            "epsilon = 0, chi = "
-            "0 to "
-            "avoid ambiguity & save computation!");
-    }
-  }
+  // if (((proteinDensity - proteinDensity[0]).raw().norm() == 0) &&
+  //     (!parameters.protein.ifPrescribe)) { // homogeneous distribution
+  //   if (parameters.variation.isProteinVariation) {
+  //     if (proteinDensity[0] < 0 || proteinDensity[0] > 1)
+  //       mem3dg_runtime_error("{0<=phi<=1}");
+  //   } else {
+  //     if (proteinDensity[0] != 1 || parameters.bending.Kb != 0 ||
+  //         parameters.dirichlet.eta != 0 || parameters.adsorption.epsilon != 0 ||
+  //         parameters.aggregation.chi != 0)
+  //       mem3dg_runtime_message(
+  //           "For homogenous membrane simulation, good practice is to set "
+  //           "proteinDensity = 1, Kb = 0, eta  = 0, "
+  //           "epsilon = 0, chi = "
+  //           "0 to "
+  //           "avoid ambiguity & save computation!");
+  //   }
+  // }
 }
 
 void System::initializeConstants(bool ifMute) {
@@ -152,15 +152,19 @@ void System::updateConfigurations() {
   }
 
   // Update protein density dependent quantities
-  if (parameters.bending.relation == "linear") {
+  if (parameters.bending.relation == "linear" &&
+      parameters.bending.relation2 == "linear") {
     H0.raw() = proteinDensity.raw() * parameters.bending.H0c + protein2Density.raw() * parameters.bending.H0c2;
+    // H0.raw() = protein2Density.raw() * parameters.bending.H0c2;
     Kb.raw() = parameters.bending.Kb +
                parameters.bending.Kbc * proteinDensity.raw().array() +
                parameters.bending.Kbc2 * protein2Density.raw().array();
+    // std::cout << Kb.raw()[0] << std::endl;
     Kd.raw() = parameters.bending.Kd +
                parameters.bending.Kdc * proteinDensity.raw().array() +
                parameters.bending.Kdc2 * protein2Density.raw().array();
-  } else if (parameters.bending.relation == "hill") {
+  } else if (parameters.bending.relation == "hill" &&
+             parameters.bending.relation2 == "hill") {
     Eigen::Matrix<double, Eigen::Dynamic, 1> proteinDensitySq =
         (proteinDensity.raw().array() * proteinDensity.raw().array()).matrix();
     Eigen::Matrix<double, Eigen::Dynamic, 1> protein2DensitySq =

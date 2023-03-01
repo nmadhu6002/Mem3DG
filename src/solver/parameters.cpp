@@ -182,6 +182,10 @@ void Parameters::checkParameters(bool hasBoundary, size_t nVertex) {
     mem3dg_runtime_error("proteinMobility value has to be consistent with the "
                          "protein variation option!");
   }
+  // if (variation.isProtein2Variation != (protein2Mobility > 0)) {
+  //   mem3dg_runtime_error("protein2Mobility value has to be consistent with the "
+  //                        "protein2 variation option!");
+  // }
 
   if (variation.isProteinConservation) {
     if (adsorption.epsilon != 0)

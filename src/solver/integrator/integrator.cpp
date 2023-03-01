@@ -185,6 +185,7 @@ double Integrator::chemicalBacktrack(
   double alpha = characteristicTimeStep;
   std::size_t count = 0;
 
+  // std::cout << system.proteinDensity.raw() << std::endl;
   // zeroth iteration
   system.proteinDensity.raw() += alpha * chemicalDirection;
   system.time += alpha;
@@ -195,6 +196,7 @@ double Integrator::chemicalBacktrack(
     // Wolfe condition fulfillment
     if (system.energy.potentialEnergy <=
         (previousE.potentialEnergy - c1 * alpha * chemicalProjection)) {
+      // std::cout << "flag" << std::endl;
       break;
     }
 
@@ -250,7 +252,7 @@ double Integrator::chemical2Backtrack(
                         chemicalDirection.array())
                            .sum();
   if (chemicalProjection < 0) {
-    mem3dg_runtime_message("chemical evolution on energy "
+    mem3dg_runtime_message("chemical2 evolution on energy "
                            "uphill direction!");
   }
   // calculate initial energy as reference level
@@ -263,6 +265,8 @@ double Integrator::chemical2Backtrack(
   double alpha = characteristicTimeStep;
   std::size_t count = 0;
   // std::cout << "chemical2Backtrack1" << std::endl;
+
+  // std::cout << system.protein2Density.raw() << std::endl;
   // zeroth iteration
   system.protein2Density.raw() += alpha * chemicalDirection;
   // std::cout << "chemical2Backtrack2" << std::endl;
@@ -275,13 +279,14 @@ double Integrator::chemical2Backtrack(
     // Wolfe condition fulfillment
     if (system.energy.potentialEnergy <=
         (previousE.potentialEnergy - c1 * alpha * chemicalProjection)) {
+      // std::cout << "flag" << std::endl;
       break;
     }
 
     // limit of backtraking iterations
     if (alpha < 1e-5 * characteristicTimeStep) {
       std::cout << "\n(time=" << system.time
-                << ") chemicalBacktrack: line search failure! Simulation "
+                << ") chemical2Backtrack: line search failure! Simulation "
                    "stopped."
                 << std::endl;
       system.backtraceEnergyGrowth(alpha, previousE);
@@ -418,11 +423,13 @@ void Integrator::saveData(bool ifOutputTrajFile, bool ifOutputMeshFile,
         << "h: " << toMatrix(system.vpg->inputVertexPositions).col(2).maxCoeff()
         << "\n"
         << "E_total: " << system.energy.totalEnergy << "\n"
+        << "vel: " << system.velocity.raw()[0][0] << ", " << system.velocity.raw()[0][1] << ", " << system.velocity.raw()[0][2] << "\n"
         << "E_kin: " << system.energy.kineticEnergy << "\n"
         << "E_pot: " << system.energy.potentialEnergy << "\n"
         << "W_ext: " << system.energy.externalWork << "\n"
         << "|e|Mech: " << system.mechErrorNorm << "\n"
         << "|e|Chem: " << system.chemErrorNorm << "\n"
+        << "|e|Chem2: " << system.chem2ErrorNorm << "\n"
         << "H: ["
         << (system.vpg->vertexMeanCurvatures.raw().array() /
             system.vpg->vertexDualAreas.raw().array())
@@ -446,8 +453,14 @@ void Integrator::saveData(bool ifOutputTrajFile, bool ifOutputMeshFile,
         << "phi: [" << system.proteinDensity.raw().minCoeff() << ","
         << system.proteinDensity.raw().maxCoeff() << "]"
         << "\n"
+        << "phi2: [" << system.protein2Density.raw().minCoeff() << ","
+        << system.protein2Density.raw().maxCoeff() << "]"
+        << "\n"
         << "sum_phi: "
         << (system.proteinDensity * system.vpg->vertexDualAreas).raw().sum()
+        << "\n"
+        << "sum_phi2: "
+        << (system.protein2Density * system.vpg->vertexDualAreas).raw().sum()
         << std::endl;
 
     // report the backtracking if verbose

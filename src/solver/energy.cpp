@@ -349,11 +349,14 @@ double System::computePotentialEnergy() {
       energy.spontaneousCurvatureEnergy + energy.deviatoricCurvatureEnergy +
       energy.areaDifferenceEnergy + energy.surfaceEnergy +
       energy.pressureEnergy + energy.adsorptionEnergy + energy.dirichletEnergy +
-      energy.aggregationEnergy + energy.entropyEnergy + energy.adsorption2Energy + 
-      energy.dirichlet2Energy + energy.aggregation2Energy + energy.entropy2Energy +
-      energy.selfAvoidancePenalty + energy.proteinInteriorPenalty + 
-      energy.proteinInteriorPenalty + energy.edgeSpringEnergy + energy.faceSpringEnergy +
-      energy.lcrSpringEnergy;
+      energy.aggregationEnergy + energy.entropyEnergy +
+
+      energy.adsorption2Energy + energy.dirichlet2Energy +
+      energy.aggregation2Energy + energy.entropy2Energy +
+      energy.protein2InteriorPenalty
+
+      + energy.selfAvoidancePenalty + energy.proteinInteriorPenalty 
+      + energy.edgeSpringEnergy + energy.faceSpringEnergy + energy.lcrSpringEnergy;
   return energy.potentialEnergy;
 }
 

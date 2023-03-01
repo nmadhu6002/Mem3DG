@@ -1377,7 +1377,7 @@ PYBIND11_MODULE(_core, pymem3dg) {
   variation.def_readwrite("isProtein2Variation",
                           &Parameters::Variation::isProtein2Variation,
                           R"delim(
-          get the option of whether simulate protein variation
+          get the option of whether simulate protein2 variation
       )delim");
   variation.def_readwrite("isProteinConservation",
                           &Parameters::Variation::isProteinConservation,
@@ -1590,7 +1590,10 @@ PYBIND11_MODULE(_core, pymem3dg) {
                           R"delim(
           get coefficient
       )delim");
-
+  dirichlet.def_readwrite("eta2", &Parameters::Dirichlet::eta2,
+                          R"delim(
+          get coefficient
+      )delim");
   py::class_<Parameters::SelfAvoidance> selfAvoidance(pymem3dg, "SelfAvoidance",
                                                       R"delim(
         The SelfAvoidance energy parameters

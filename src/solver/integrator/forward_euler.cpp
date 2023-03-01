@@ -36,6 +36,7 @@ namespace gc = ::geometrycentral;
 
 bool Euler::integrate() {
   // std::cout << "integrate" << std::endl;
+  // std::cout << system.proteinRateOfChange.raw()[0] << " " << system.protein2RateOfChange.raw()[0]  << std::endl;
   if (ifDisableIntegrate)
     mem3dg_runtime_error("integrate() is disabled for current construction!");
 
@@ -248,17 +249,22 @@ void Euler::march() {
            timeStep_chem2 = std::numeric_limits<double>::max();
     if (system.parameters.variation.isShapeVariation)
       timeStep_mech = mechanicalBacktrack(toMatrix(system.velocity), rho, c1);
-    if (system.parameters.variation.isProteinVariation)
+    if (system.parameters.variation.isProteinVariation){
       timeStep_chem =
           chemicalBacktrack(system.proteinRateOfChange.raw(), rho, c1);
-    if (system.parameters.variation.isProtein2Variation)
+      // std::cout << timeStep_chem << std::endl;
+    }
+    if (system.parameters.variation.isProtein2Variation) {
       timeStep_chem2 =
           chemical2Backtrack(system.protein2RateOfChange.raw(), rho, c1);
+      // std::cout << timeStep_chem2 << std::endl;
+    }
     double temp_timeStep =(timeStep_chem < timeStep_mech) ? timeStep_chem : timeStep_mech;
     timeStep = (timeStep_chem2 < temp_timeStep) ? timeStep_chem2 : temp_timeStep;
   } else {
     timeStep = characteristicTimeStep;
   }
+
   system.vpg->inputVertexPositions += system.velocity * timeStep;
   system.proteinDensity += system.proteinRateOfChange * timeStep;
   system.protein2Density += system.protein2RateOfChange * timeStep;

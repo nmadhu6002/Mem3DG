@@ -31,6 +31,7 @@ void System::saveRichData(std::string PathToSave, bool isJustGeometry) {
 
     // write protein distribution
     richData.addVertexProperty("proteinDensity", proteinDensity);
+    richData.addVertexProperty("protein2Density", protein2Density);
     richData.addVertexProperty("velocity", forces.ontoNormal(velocity));
 
     // write bool
@@ -69,6 +70,10 @@ void System::saveRichData(std::string PathToSave, bool isJustGeometry) {
     richData.addVertexProperty("osmoticForce", forces.osmoticForce);
     richData.addVertexProperty("adsorptionForce", forces.adsorptionForce);
     richData.addVertexProperty("aggregationForce", forces.aggregationForce);
+
+    richData.addVertexProperty("adsorption2Force", forces.adsorption2Force);
+    richData.addVertexProperty("aggregation2Force", forces.aggregation2Force);
+
     richData.addVertexProperty("externalForce", forces.externalForce);
     richData.addVertexProperty("selfAvoidanceForce", forces.selfAvoidanceForce);
     richData.addVertexProperty("mechanicalForce", forces.mechanicalForce);
@@ -84,6 +89,17 @@ void System::saveRichData(std::string PathToSave, bool isJustGeometry) {
     richData.addVertexProperty("aggregationPotential",
                                forces.aggregationPotential);
     richData.addVertexProperty("chemicalPotential", forces.chemicalPotential);
+
+    richData.addVertexProperty("dirichlet2Potential", forces.dirichlet2Potential);
+    richData.addVertexProperty("spontaneousCurvature2Potential",
+                               forces.spontaneousCurvature2Potential);
+    richData.addVertexProperty("deviatoricCurvature2Potential",
+                               forces.deviatoricCurvature2Potential);
+    richData.addVertexProperty("adsorption2Potential",
+                               forces.adsorption2Potential);
+    richData.addVertexProperty("aggregation2Potential",
+                               forces.aggregation2Potential);
+    richData.addVertexProperty("chemical2Potential", forces.chemical2Potential);
 
     richData.write(PathToSave);
   }

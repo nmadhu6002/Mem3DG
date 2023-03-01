@@ -407,23 +407,23 @@ void System::computeChemicalPotentials(bool protein, bool protein2) {
             .matrix();
   }
 
-  if (parameters.bending.relation == "linear") {
-    dH0dphi2.fill(parameters.bending.H0c);
-    dKbdphi2.fill(parameters.bending.Kbc);
-    dKddphi2.fill(parameters.bending.Kdc);
-  } else if (parameters.bending.relation == "hill") {
+  if (parameters.bending.relation2 == "linear") {
+    dH0dphi2.fill(parameters.bending.H0c2);
+    dKbdphi2.fill(parameters.bending.Kbc2);
+    dKddphi2.fill(parameters.bending.Kdc2);
+  } else if (parameters.bending.relation2 == "hill") {
     EigenVectorX1d protein2DensitySq =
         (protein2Density.raw().array() * protein2Density.raw().array()).matrix();
     dH0dphi2.raw() =
-        (2 * parameters.bending.H0c * protein2Density.raw().array() /
+        (2 * parameters.bending.H0c2 * protein2Density.raw().array() /
          ((1 + protein2DensitySq.array()) * (1 + protein2DensitySq.array())))
             .matrix();
     dKbdphi2.raw() =
-        (2 * parameters.bending.Kbc * protein2Density.raw().array() /
+        (2 * parameters.bending.Kbc2 * protein2Density.raw().array() /
          ((1 + protein2DensitySq.array()) * (1 + protein2DensitySq.array())))
             .matrix();
     dKddphi2.raw() =
-        (2 * parameters.bending.Kdc * protein2Density.raw().array() /
+        (2 * parameters.bending.Kdc2 * protein2Density.raw().array() /
          ((1 + protein2DensitySq.array()) * (1 + protein2DensitySq.array())))
             .matrix();
   }
@@ -433,22 +433,30 @@ void System::computeChemicalPotentials(bool protein, bool protein2) {
         -vpg->vertexDualAreas.raw().array() *
         (meanCurvDiff * meanCurvDiff * dKbdphi.raw().array() -
          2 * Kb.raw().array() * meanCurvDiff * dH0dphi.raw().array()));
+    // std::cout << forces.spontaneousCurvaturePotential.raw()[0] << std::endl;
+  }
+
+  if (parameters.bending.Kb != 0 || parameters.bending.Kbc2 != 0) {
     forces.spontaneousCurvature2Potential.raw() = forces.maskProtein(
         -vpg->vertexDualAreas.raw().array() *
         (meanCurvDiff * meanCurvDiff * dKbdphi2.raw().array() -
          2 * Kb.raw().array() * meanCurvDiff * dH0dphi2.raw().array()));
+    // std::cout << forces.spontaneousCurvature2Potential.raw()[0] << std::endl;
   }
 
   if (parameters.bending.Kd != 0 || parameters.bending.Kdc != 0) {
     forces.deviatoricCurvaturePotential.raw() =
         -dKddphi.raw().array() *
         vpg->vertexGaussianCurvatures.raw().array().square();
-    forces.deviatoricCurvature2Potential.raw() =
-        -dKddphi2.raw().array() *
-        vpg->vertexGaussianCurvatures.raw().array().square();
     // (vpg->vertexMeanCurvatures.raw().array().square() /
     //      vpg->vertexDualAreas.raw().array() -
     //  vpg->vertexGaussianCurvatures.raw().array());
+  }
+
+  if (parameters.bending.Kd != 0 || parameters.bending.Kdc2 != 0) {
+    forces.deviatoricCurvature2Potential.raw() =
+        -dKddphi2.raw().array() *
+        vpg->vertexGaussianCurvatures.raw().array().square();
   }
 
   if (parameters.adsorption.epsilon != 0)
@@ -796,6 +804,8 @@ void System::computeConservativeForcing() {
     // mechanical force includes all conservative forces
     forces.mechanicalForceVec = forces.conservativeForceVec;
     forces.mechanicalForce = forces.ontoNormal(forces.mechanicalForceVec);
+    std::cout << "[" << forces.osmoticForceVec.raw()[0][0] << ", "
+    << forces.osmoticForceVec.raw()[0][1] << ", " << forces.osmoticForceVec.raw()[0][2] << "]" << std::endl;
   }
 
   // total chemical potential is summed inside function call
