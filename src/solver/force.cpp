@@ -59,6 +59,7 @@ void System::computeGeometricForces(size_t i) {
   gc::Vector3 capillaryForceVec{0, 0, 0};
   gc::Vector3 osmoticForceVec{0, 0, 0};
   gc::Vector3 lineCapillaryForceVec{0, 0, 0};
+  gc::Vector3 lineCapillary2ForceVec{0, 0, 0};
   gc::Vector3 adsorptionForceVec{0, 0, 0};
   gc::Vector3 aggregationForceVec{0, 0, 0};
   gc::Vector3 entropyForceVec{0, 0, 0};
@@ -79,7 +80,7 @@ void System::computeGeometricForces(size_t i) {
   double totalMeanCurvature = vpg->vertexMeanCurvatures.raw().sum();
 
   bool boundaryVertex = v.isBoundary();
-
+  int counter = 0;
   for (gc::Halfedge he : v.outgoingHalfedges()) {
     std::size_t fID = he.face().getIndex();
 
@@ -143,9 +144,18 @@ void System::computeGeometricForces(size_t i) {
       spontaneousCurvatureForceVec_gaussVec -=
           (Kbi * (Hi - H0i) + Kbj * (Hj - H0j)) * gaussVec;
     }
-    if (forces.osmoticPressure != 0) // omostic force
+    if (forces.osmoticPressure != 0){ // omostic force
       osmoticForceVec += forces.osmoticPressure *
                          computeHalfedgeVolumeVariationVector(*vpg, he);
+      // std::cout << counter << std::endl;
+      // if (counter % 1000 == 0){
+      //   std::cout << computeHalfedgeVolumeVariationVector(*vpg, he) << std::endl;
+      // // std::cout << "[" << forces.osmoticForceVec.raw()[0][0] << ", "
+      // //           << forces.osmoticForceVec.raw()[0][1] << ", "
+      // //           << forces.osmoticForceVec.raw()[0][2] << "]"
+      // //           << std::endl;
+      // }
+    }
     if (forces.surfaceTension != 0) // surface capillary force
       capillaryForceVec -= forces.surfaceTension * areaGrad;
     if (Kdi != 0 || Kdj != 0) { // deviatoric curvature force
@@ -237,6 +247,12 @@ void System::computeGeometricForces(size_t i) {
       lineCapillaryForceVec -=
           parameters.dirichlet.eta *
           (0.125 * dirichletVec - 0.5 * dphi_ijk.norm2() * oneSidedAreaGrad);
+
+    if (parameters.dirichlet.eta2 != 0) // line capillary force
+      lineCapillaryForceVec -=
+          parameters.dirichlet.eta2 *
+          (0.125 * dirichlet2Vec - 0.5 * dphi2_ijk.norm2() * oneSidedAreaGrad);
+    
     if (parameters.bending.alpha != 0) // area difference force
       areaDifferenceForceVec -=
           4 * areaDifferenceK *
@@ -250,6 +266,7 @@ void System::computeGeometricForces(size_t i) {
           parameters.bending.dA0 * parameters.bending.dA0 * areaDifferenceK /
               parameters.bending.D / parameters.bending.D / surfaceArea /
               surfaceArea * areaGrad;
+    counter++;
   }
 
   spontaneousCurvatureForceVec = spontaneousCurvatureForceVec_areaGrad +
@@ -277,6 +294,9 @@ void System::computeGeometricForces(size_t i) {
   osmoticForceVec = forces.maskForce(osmoticForceVec, i);
   capillaryForceVec = forces.maskForce(capillaryForceVec, i);
   lineCapillaryForceVec = forces.maskForce(lineCapillaryForceVec, i);
+
+  lineCapillary2ForceVec = forces.maskForce(lineCapillary2ForceVec, i);
+
   adsorptionForceVec = forces.maskForce(adsorptionForceVec, i);
   aggregationForceVec = forces.maskForce(aggregationForceVec, i);
   entropyForceVec = forces.maskForce(entropyForceVec, i);
@@ -301,6 +321,9 @@ void System::computeGeometricForces(size_t i) {
   forces.capillaryForceVec[i] = capillaryForceVec;
   forces.osmoticForceVec[i] = osmoticForceVec;
   forces.lineCapillaryForceVec[i] = lineCapillaryForceVec;
+
+  forces.lineCapillary2ForceVec[i] = lineCapillary2ForceVec;
+
   forces.adsorptionForceVec[i] = adsorptionForceVec;
   forces.aggregationForceVec[i] = aggregationForceVec;
   forces.entropyForceVec[i] = entropyForceVec;
@@ -318,6 +341,9 @@ void System::computeGeometricForces(size_t i) {
   forces.capillaryForce[i] = forces.ontoNormal(capillaryForceVec, i);
   forces.osmoticForce[i] = forces.ontoNormal(osmoticForceVec, i);
   forces.lineCapillaryForce[i] = forces.ontoNormal(lineCapillaryForceVec, i);
+
+  forces.lineCapillary2Force[i] = forces.ontoNormal(lineCapillary2ForceVec, i);
+
   forces.adsorptionForce[i] = forces.ontoNormal(adsorptionForceVec, i);
   forces.aggregationForce[i] = forces.ontoNormal(aggregationForceVec, i);
   forces.entropyForce[i] = forces.ontoNormal(entropyForceVec, i);
@@ -728,6 +754,9 @@ void System::computeConservativeForcing() {
   forces.capillaryForceVec.fill({0, 0, 0});
   forces.osmoticForceVec.fill({0, 0, 0});
   forces.lineCapillaryForceVec.fill({0, 0, 0});
+
+  forces.lineCapillary2ForceVec.fill({0, 0, 0});
+
   forces.adsorptionForceVec.fill({0, 0, 0});
   forces.aggregationForceVec.fill({0, 0, 0});
   forces.entropyForceVec.fill({0, 0, 0});
@@ -748,6 +777,9 @@ void System::computeConservativeForcing() {
   forces.areaDifferenceForce.raw().setZero();
   forces.capillaryForce.raw().setZero();
   forces.lineCapillaryForce.raw().setZero();
+
+  forces.lineCapillary2Force.raw().setZero();
+
   forces.externalForce.raw().setZero();
   forces.adsorptionForce.raw().setZero();
   forces.aggregationForce.raw().setZero();
@@ -794,7 +826,8 @@ void System::computeConservativeForcing() {
         forces.osmoticForceVec + forces.capillaryForceVec +
         forces.spontaneousCurvatureForceVec +
         forces.deviatoricCurvatureForceVec + forces.areaDifferenceForceVec +
-        forces.lineCapillaryForceVec + forces.adsorptionForceVec +
+        forces.lineCapillaryForceVec +
+        forces.lineCapillary2ForceVec + forces.adsorptionForceVec +
         forces.aggregationForceVec + forces.entropyForceVec +
         forces.adsorption2ForceVec + forces.aggregation2ForceVec +
         forces.entropy2ForceVec + forces.selfAvoidanceForceVec +
@@ -804,8 +837,6 @@ void System::computeConservativeForcing() {
     // mechanical force includes all conservative forces
     forces.mechanicalForceVec = forces.conservativeForceVec;
     forces.mechanicalForce = forces.ontoNormal(forces.mechanicalForceVec);
-    std::cout << "[" << forces.osmoticForceVec.raw()[0][0] << ", "
-    << forces.osmoticForceVec.raw()[0][1] << ", " << forces.osmoticForceVec.raw()[0][2] << "]" << std::endl;
   }
 
   // total chemical potential is summed inside function call

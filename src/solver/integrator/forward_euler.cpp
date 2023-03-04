@@ -60,6 +60,7 @@ bool Euler::integrate() {
   const double avoidStrength = system.parameters.selfAvoidance.mu;
   // unsigned count = 0;
   for (;;) {
+    // std::cout << system.protein2Density.raw() << "\n\n";
     // std::cout << count++  << std::endl;
     // turn on/off self-avoidance; outside status-march-cycle; before savedata
     // to write selfAvoidance
@@ -91,12 +92,12 @@ bool Euler::integrate() {
       lastSave = system.time;
       saveData(ifOutputTrajFile, ifOutputMeshFile, ifPrintToConsole);
     }
-
+    // std::cout << "tag\n" << system.protein2Density.raw() << "tag3" << "\n\n";
     // break loop if EXIT flag is on
     if (EXIT) {
       break;
     }
-
+    // std::cout << "hello1" << std::endl;
     // Process mesh every tProcessMesh period
     if (system.time - lastProcessMesh > (processMeshPeriod * timeStep)) {
       lastProcessMesh = system.time;
@@ -123,10 +124,11 @@ bool Euler::integrate() {
         system.prescribeGeodesicProteinDensityDistribution();
       system.updateConfigurations();
     }
-
+    // std::cout << "hello2" << std::endl;
     // step forward
     if (system.time == lastProcessMesh || system.time == lastUpdateGeodesics) {
       system.time += 1e-10 * characteristicTimeStep;
+      // std::cout << "hello3" << std::endl;
     } else {
       march();
     }
@@ -167,8 +169,43 @@ void Euler::checkParameters() {
 void Euler::status() {
   // std::cout << "status" << std::endl;
   // compute summerized forces
+  // std::cout << system.forces.osmoticPressure << std::endl;
   system.computeConservativeForcing();
   system.addNonconservativeForcing(timeStep);
+  // std::cout << "[" << system.forces.osmoticForceVec.raw()[0][0] << ", "
+  //           << system.forces.osmoticForceVec.raw()[0][1] << ", "
+  //           << system.forces.osmoticForceVec.raw()[0][2] << "]" << std::endl;
+  // std::cout << "Osmotic Force: " 
+  //           << system.forces.osmoticForceVec.raw()[0] << "\n"
+  //           << "Capilary Force: " 
+  //           << system.forces.capillaryForceVec.raw()[0] << "\n"
+  //           << "Spontaneous Curvature: "
+  //           << system.forces.spontaneousCurvatureForceVec.raw()[0] << "\n"
+  //           << "Deviatoric Curvature: "
+  //           << system.forces.deviatoricCurvatureForceVec.raw()[0] << "\n"
+  //           << "Area Difference: "
+  //           << system.forces.areaDifferenceForceVec.raw()[0] << "\n"
+  //           << "Line Capillary: "
+  //           << system.forces.lineCapillaryForceVec.raw()[0] << "\n"
+  //           << "Line Capillary 2: "
+  //           << system.forces.lineCapillary2ForceVec.raw()[0] << "\n"
+  //           << "Adsorption Force: "
+  //           << system.forces.adsorptionForceVec.raw()[0] << "\n"
+  //           << "Aggregation Force: "
+  //           << system.forces.aggregationForceVec.raw()[0] << "\n"
+  //           << "Entropy Force: "
+  //           << system.forces.entropyForceVec.raw()[0] << "\n"
+  //           << "Adsorption 2 Force: "
+  //           << system.forces.adsorption2ForceVec.raw()[0] << "\n"
+  //           << "Aggregation 2 Force: "
+  //           << system.forces.aggregation2ForceVec.raw()[0] << "\n"
+  //           << "Entropy 2 Force: "
+  //           << system.forces.entropy2ForceVec.raw()[0] << "\n"
+  //           << "Self Avoidence: "
+  //           << system.forces.selfAvoidanceForceVec.raw()[0] << "\n"
+  //           << "Spring Force: "
+  //           << system.forces.springForceVec.raw()[0] << "\n"
+  //           << std::endl;
 
   // exit if under error tolerance
   if (system.mechErrorNorm < tolerance && system.chemErrorNorm < tolerance && system.chem2ErrorNorm < tolerance) {
@@ -202,6 +239,7 @@ void Euler::march() {
   // std::cout << "march" << std::endl;
   // compute velocity, which are independent of time
   system.velocity = system.forces.mechanicalForceVec;
+  // std::cout << system.velocity.raw()[0] << "\n\n";
   system.mechErrorNorm = (toMatrix(system.velocity).array() *
                           toMatrix(system.forces.mechanicalForceVec).array())
                              .sum();
@@ -236,7 +274,7 @@ void Euler::march() {
                             system.forces.chemical2Potential.raw().array())
                                .sum();
   }
-
+  // std::cout << system.protein2RateOfChange.raw() << std::endl;
   // adjust time step if adopt adaptive time step based on mesh size
   if (ifAdaptiveStep) {
     characteristicTimeStep = getAdaptiveCharacteristicTimeStep();
@@ -269,6 +307,13 @@ void Euler::march() {
   system.proteinDensity += system.proteinRateOfChange * timeStep;
   system.protein2Density += system.protein2RateOfChange * timeStep;
   system.time += timeStep;
+  // std::cout << system.protein2Density.raw() << "tag2" << "\n\n";
+  // std::cout << "phi: [" << system.proteinDensity.raw().minCoeff() << ","
+  // << system.proteinDensity.raw().maxCoeff() << "]"
+  // << "\n"
+  // << "phi2: [" << system.protein2Density.raw().minCoeff() << ","
+  // << system.protein2Density.raw().maxCoeff()
+  // << "]" << std::endl;
 
   // recompute cached values
   system.updateConfigurations();

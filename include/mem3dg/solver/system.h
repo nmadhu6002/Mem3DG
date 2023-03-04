@@ -561,9 +561,6 @@ public:
     protein2DensityGradient = gcs::FaceData<gc::Vector3>(*mesh, {0, 0, 0});
     protein2RateOfChange = gcs::VertexData<double>(*mesh, 0);
 
-    std::cout << "phi2: [" << protein2Density.raw().minCoeff() << ","
-              << proteinDensity.raw().maxCoeff() << "]" << std::endl;
-
     H0 = gcs::VertexData<double>(*mesh);
     Kb = gcs::VertexData<double>(*mesh);
     Kd = gcs::VertexData<double>(*mesh);

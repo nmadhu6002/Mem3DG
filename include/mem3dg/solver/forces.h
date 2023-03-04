@@ -67,6 +67,8 @@ DLL_PUBLIC struct Forces {
   gcs::VertexData<double> capillaryForce;
   /// Cached interfacial line tension force
   gcs::VertexData<double> lineCapillaryForce;
+  /// Cached interfacial line tension force for protein 2
+  gcs::VertexData<double> lineCapillary2Force;
   /// Cached adsorption induced surface force
   gcs::VertexData<double> adsorptionForce;
   /// Cached aggregation induced surface force
@@ -117,6 +119,8 @@ DLL_PUBLIC struct Forces {
   gcs::VertexData<gc::Vector3> osmoticForceVec;
   /// Cached Dirichlet energy driven force
   gcs::VertexData<gc::Vector3> lineCapillaryForceVec;
+  /// Cached Dirichlet energy driven force from protein 2
+  gcs::VertexData<gc::Vector3> lineCapillary2ForceVec;
   /// Cached adsorption driven force
   gcs::VertexData<gc::Vector3> adsorptionForceVec;
   /// Cached aggregation driven force
@@ -211,11 +215,12 @@ DLL_PUBLIC struct Forces {
 
         selfAvoidanceForceVec(mesh, {0, 0, 0}),
         lineCapillaryForceVec(mesh, {0, 0, 0}),
+        lineCapillary2ForceVec(mesh, {0, 0, 0}),
         spontaneousCurvatureForce(mesh, 0), deviatoricCurvatureForce(mesh, 0),
         areaDifferenceForce(mesh, 0), capillaryForce(mesh, 0),
         surfaceTension(0), lineCapillaryForce(mesh, 0),
-        adsorptionForce(mesh, 0), aggregationForce(mesh, 0),
-        entropyForce(mesh, 0),
+        lineCapillary2Force(mesh, 0), adsorptionForce(mesh, 0),
+        aggregationForce(mesh, 0), entropyForce(mesh, 0),
 
         adsorption2Force(mesh, 0), aggregation2Force(mesh, 0),
         entropy2Force(mesh, 0),
