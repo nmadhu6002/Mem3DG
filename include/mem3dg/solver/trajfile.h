@@ -91,7 +91,7 @@ public:
     meancurve_var = fd->getVar(MEANCURVE_VAR);
     gausscurve_var = fd->getVar(GAUSSCURVE_VAR);
     phi_var = fd->getVar(PHI_VAR);
-    phi2_var = fd->getVar(PHI_VAR);
+    phi2_var = fd->getVar(PHI2_VAR);
     sponcurve_var = fd->getVar(SPONCURVE_VAR);
     chempotential_var = fd->getVar(CHEMPOTENTIAL_VAR);
     physforce_var = fd->getVar(PHYSFORCE_VAR);
