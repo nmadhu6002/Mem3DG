@@ -936,7 +936,7 @@ def animate(
                     "protein2Density",
                     protein2Density,
                     vminmax=(-1, 1),  # keep the center (white) at 0
-                    cmap="coolwarm",
+                    cmap="pink-green",
                     enabled=False,
                 )
             else:

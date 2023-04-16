@@ -421,9 +421,9 @@ void Integrator::saveData(bool ifOutputTrajFile, bool ifOutputMeshFile,
         << "V, Vt: " << system.volume << ", " << system.parameters.osmotic.Vt
         << ", "
         << "h: " << toMatrix(system.vpg->inputVertexPositions).col(2).maxCoeff()
-        << "\n"
+        << ", "
+        << "e2: " << system.parameters.adsorption.epsilon2 << "\n"
         << "E_total: " << system.energy.totalEnergy << "\n"
-        << "vel: " << system.velocity.raw()[0][0] << ", " << system.velocity.raw()[0][1] << ", " << system.velocity.raw()[0][2] << "\n"
         << "E_kin: " << system.energy.kineticEnergy << "\n"
         << "E_pot: " << system.energy.potentialEnergy << "\n"
         << "W_ext: " << system.energy.externalWork << "\n"

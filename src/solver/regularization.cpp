@@ -299,6 +299,8 @@ bool System::meshGrowth() {
     double vertex2GeoDist = geodesicDistance[vertex2];
     double vertex1Phi = proteinDensity[vertex1];
     double vertex2Phi = proteinDensity[vertex2];
+    double vertex1Phi2 = protein2Density[vertex1];
+    double vertex2Phi2 = protein2Density[vertex2];
     gc::Vector3 vertex1ForceMask = forces.forceMask[vertex1];
     gc::Vector3 vertex2ForceMask = forces.forceMask[vertex2];
     bool vertex1PointTracker = centerTracker[vertex1];
@@ -325,6 +327,7 @@ bool System::meshGrowth() {
       velocity[newVertex] = 0.5 * (vertex1Vel + vertex2Vel);
       geodesicDistance[newVertex] = 0.5 * (vertex1GeoDist + vertex2GeoDist);
       proteinDensity[newVertex] = 0.5 * (vertex1Phi + vertex2Phi);
+      protein2Density[newVertex] = 0.5 * (vertex1Phi2 + vertex2Phi2);
       centerTracker[newVertex] = false;
       forces.forceMask[newVertex] = gc::Vector3{1, 1, 1};
 
@@ -356,6 +359,7 @@ bool System::meshGrowth() {
         velocity[newVertex] = 0.5 * (vertex1Vel + vertex2Vel);
         geodesicDistance[newVertex] = 0.5 * (vertex1GeoDist + vertex2GeoDist);
         proteinDensity[newVertex] = 0.5 * (vertex1Phi + vertex2Phi);
+        protein2Density[newVertex] = 0.5 * (vertex1Phi2 + vertex2Phi2);
         centerTracker[newVertex] = vertex1PointTracker || vertex2PointTracker;
 
         // isOrigVertex[newVertex] = false;
@@ -399,6 +403,8 @@ bool System::growMesh() {
     double vertex2GeoDist = geodesicDistance[vertex2];
     double vertex1Phi = proteinDensity[vertex1];
     double vertex2Phi = proteinDensity[vertex2];
+    double vertex1Phi2 = protein2Density[vertex1];
+    double vertex2Phi2 = protein2Density[vertex2];
     gc::Vector3 vertex1ForceMask = forces.forceMask[vertex1];
     gc::Vector3 vertex2ForceMask = forces.forceMask[vertex2];
     bool vertex1PointTracker = centerTracker[vertex1];
@@ -415,6 +421,7 @@ bool System::growMesh() {
       velocity[newVertex] = 0.5 * (vertex1Vel + vertex2Vel);
       geodesicDistance[newVertex] = 0.5 * (vertex1GeoDist + vertex2GeoDist);
       proteinDensity[newVertex] = 0.5 * (vertex1Phi + vertex2Phi);
+      protein2Density[newVertex] = 0.5 * (vertex1Phi2 + vertex2Phi2);
       centerTracker[newVertex] = false;
       forces.forceMask[newVertex] = gc::Vector3{1, 1, 1};
 
@@ -439,6 +446,8 @@ bool System::growMesh() {
       double vertex2GeoDist = geodesicDistance[vertex2];
       double vertex1Phi = proteinDensity[vertex1];
       double vertex2Phi = proteinDensity[vertex2];
+      double vertex1Phi2 = protein2Density[vertex1];
+      double vertex2Phi2 = protein2Density[vertex2];
       gc::Vector3 vertex1ForceMask = forces.forceMask[vertex1];
       gc::Vector3 vertex2ForceMask = forces.forceMask[vertex2];
       bool vertex1PointTracker = centerTracker[vertex1];
@@ -457,6 +466,7 @@ bool System::growMesh() {
           velocity[newVertex] = 0.5 * (vertex1Vel + vertex2Vel);
           geodesicDistance[newVertex] = 0.5 * (vertex1GeoDist + vertex2GeoDist);
           proteinDensity[newVertex] = 0.5 * (vertex1Phi + vertex2Phi);
+          protein2Density[newVertex] = 0.5 * (vertex1Phi2 + vertex2Phi2);
           centerTracker[newVertex] = vertex1PointTracker || vertex2PointTracker;
           meshProcessor.meshMutator.markVertices(mutationMarker, newVertex);
         }

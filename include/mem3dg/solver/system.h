@@ -552,12 +552,12 @@ public:
 
     energy = Energy({time, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
 
-    proteinDensity = gc::VertexData<double>(*mesh, 0);
+    proteinDensity = gc::VertexData<double>(*mesh, 0.5);
     proteinDensityGradient = gcs::FaceData<gc::Vector3>(*mesh, {0, 0, 0});
     velocity = gcs::VertexData<gc::Vector3>(*mesh, {0, 0, 0});
     proteinRateOfChange = gcs::VertexData<double>(*mesh, 0);
 
-    protein2Density = gc::VertexData<double>(*mesh, 0);
+    protein2Density = gc::VertexData<double>(*mesh, 0.5);
     protein2DensityGradient = gcs::FaceData<gc::Vector3>(*mesh, {0, 0, 0});
     protein2RateOfChange = gcs::VertexData<double>(*mesh, 0);
 
