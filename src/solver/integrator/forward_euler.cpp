@@ -14,6 +14,8 @@
 
 #include <Eigen/Core>
 #include <iostream>
+// #include <fstream>
+// #include <vector>
 #include <math.h>
 #include <pcg_random.hpp>
 
@@ -35,6 +37,8 @@ namespace integrator {
 namespace gc = ::geometrycentral;
 
 bool Euler::integrate() {
+  // std::ofstream outfile;
+  // outfile.open("data.txt", std::ios_base::app);
   // std::cout << "integrate" << std::endl;
   // std::cout << system.proteinRateOfChange.raw()[0] << " " << system.protein2RateOfChange.raw()[0]  << std::endl;
   if (ifDisableIntegrate)
@@ -95,6 +99,66 @@ bool Euler::integrate() {
     // std::cout << "tag\n" << system.protein2Density.raw() << "tag3" << "\n\n";
     // break loop if EXIT flag is on
     if (EXIT) {
+      // double sum1, sum2, sum3 = 0;
+      // int num_vert = system.proteinDensity.raw().size();
+      // for (int i = 0; i < num_vert; ++i)
+      //   sum1 += system.proteinDensity.raw()[i] * system.protein2Density.raw()[i];
+      // for (int i = 0; i < num_vert; ++i)
+      //   sum2 += std::pow(system.proteinDensity.raw()[i], 2);
+      // for (int i = 0; i < num_vert; ++i)
+      //   sum3 += std::pow(system.protein2Density.raw()[i], 2);
+      // double corr = sum1/std::pow(sum2 * sum3, 0.5);
+      // outfile << corr << "\n";
+
+      // outfile << sum1 / num_vert << " " << system.parameters.adsorption.epsilon2 / system.parameters.adsorption.epsilon << "\n";
+
+      // double min1, min2 = 1000;
+      // double max1, max2 = 0;
+      // double median1, median2;
+      // double mean1, mean2;
+      // double density1, density2;
+      // sum1 = 0; sum2 = 0;
+      // std::vector<double> vec1, vec2;
+      // for (int i = 0; i < num_vert; ++i)
+      // {
+      //   vec1.push_back(system.proteinDensity.raw()[i]);
+      //   vec2.push_back(system.protein2Density.raw()[i]);
+      // }
+      // if (num_vert % 2 == 0) {
+      //   std::nth_element(vec1.begin(), vec1.begin() + num_vert / 2, vec1.end());
+      //   std::nth_element(vec1.begin(), vec1.begin() + (num_vert - 1) / 2, vec1.end());
+      //   median1 = (double)(vec1[(num_vert - 1) / 2] + vec1[num_vert / 2]) / 2.0;
+
+      //   std::nth_element(vec2.begin(), vec2.begin() + num_vert / 2, vec2.end());
+      //   std::nth_element(vec2.begin(), vec2.begin() + (num_vert - 1) / 2, vec2.end());
+      //   median2 = (double)(vec2[(num_vert - 1) / 2] + vec2[num_vert / 2]) / 2.0;
+      // } 
+      // else {
+      //   std::nth_element(vec1.begin(), vec1.begin() + num_vert / 2, vec1.end());
+      //   median1 = (double)vec1[num_vert / 2];
+
+      //   std::nth_element(vec2.begin(), vec2.begin() + num_vert / 2, vec2.end());
+      //   median2 = (double)vec2[num_vert / 2];
+      // }
+
+      // for (int i = 0; i < num_vert; ++i)
+      // {
+      //   density1 = system.proteinDensity.raw()[i];
+      //   density2 = system.protein2Density.raw()[i];
+      //   sum1 += density1; sum2 += density2;
+      //   if (density1 < min1)
+      //     min1 = density1;
+      //   if (density1 > max1)
+      //     max1 = density1;
+      //   if (density2 < min2)
+      //     min2 = density2;
+      //   if (density2 > max2)
+      //     max2 = density2;
+      // }
+      // outfile << "Min: " << min1 << " " << min2 << "\n";
+      // outfile << "Max: " << max1 << " " << max2 << "\n";
+      // outfile << "Median: " << median1 << " " << median2 << "\n";
+      // outfile << "Average: " << sum1 / num_vert << " " << sum2 / num_vert << "\n\n";
       break;
     }
     // std::cout << "hello1" << std::endl;
@@ -149,6 +213,7 @@ bool Euler::integrate() {
     filePath.append(trajFileName);
   }
 
+  // outfile.close();
   return SUCCESS;
 }
 
