@@ -19,6 +19,7 @@ from ._core import (
     MeshProcessor,
     Osmotic,
     Parameters,
+    pParameters,
     Point,
     Protein,
     SelfAvoidance,

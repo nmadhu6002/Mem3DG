@@ -48,6 +48,8 @@ void System::computeGeometricForces(gcs::Vertex &v) {
 }
 
 void System::computeGeometricForces(size_t i) {
+  int n = pDensities.size();
+
   gc::Vertex v{geometry.mesh->vertex(i)};
   gc::Vector3 spontaneousCurvatureForceVec{0, 0, 0};
   gc::Vector3 spontaneousCurvatureForceVec_areaGrad{0, 0, 0};
@@ -70,6 +72,10 @@ void System::computeGeometricForces(size_t i) {
   double Kbi = Kb[i];
   double Kdi = Kd[i];
   double proteinDensityi = proteinDensity[i];
+  std::vector<double> pDensitiesi;
+  for (int j = 0; j < n; ++j) {
+    pDensitiesi[j] = pDensities[j][i];
+  }
   double areaDifferenceK =
       0.25 * parameters.bending.alpha * parameters.bending.Kb * constants::PI;
   double totalMeanCurvature = geometry.vpg->vertexMeanCurvatures.raw().sum();
@@ -91,6 +97,10 @@ void System::computeGeometricForces(size_t i) {
     double Kbj = Kb[i_vj];
     double Kdj = Kd[i_vj];
     double proteinDensityj = proteinDensity[i_vj];
+    std::vector<double> pDensitiesj;
+    for (int j = 0; j < n; ++j) {
+      pDensitiesj[j] = pDensities[j][i_vj];
+    }
     bool interiorHalfedge = he.isInterior();
     bool boundaryEdge = he.edge().isBoundary();
     bool boundaryNeighborVertex = he.next().vertex().isBoundary();
@@ -181,6 +191,30 @@ void System::computeGeometricForces(size_t i) {
       lineCapillaryForceVec -=
           parameters.dirichlet.eta *
           (0.125 * dirichletVec - 0.5 * dphi_ijk.norm2() * oneSidedAreaGrad);
+
+    for (int j = 0; j < n; ++j){
+      if (pParameters[j].epsilon != 0) // adsorption force
+        adsorptionForceVec -= (pDensitiesi[j] / 3 + pDensitiesj[j] * 2 / 3) *
+                              pParameters[j].epsilon * areaGrad;
+      if (parameters.aggregation.chi != 0) // aggregation force
+        aggregationForceVec -=
+            (pow(pow(2 * pDensitiesi[j] - 1, 2) - 1, 2) / 3 +
+             pow(pow(2 * pDensitiesj[j] - 1, 2) - 1, 2) * 2 / 3) *
+            pParameters[j].chi * areaGrad;
+      if (parameters.entropy.xi != 0) // entropy force
+        entropyForceVec -= ((pDensitiesi[j] * log(pDensitiesi[j]) +
+                             (1 - pDensitiesi[j]) * log(1 - pDensitiesi[j])) /
+                                3 +
+                            (pDensitiesj[j] * log(pDensitiesj[j]) +
+                             (1 - pDensitiesj[j]) * log(1 - pDensitiesj[j])) *
+                                2 / 3) *
+                           pParameters[j].xi * areaGrad;
+      if (parameters.dirichlet.eta != 0) // line capillary force
+        lineCapillaryForceVec -=
+            pParameters[j].eta *
+            (0.125 * dirichletVec - 0.5 * dphi_ijk.norm2() * oneSidedAreaGrad);
+    }
+
     if (parameters.bending.alpha != 0) // area difference force
       areaDifferenceForceVec -=
           4 * areaDifferenceK *
@@ -399,6 +433,108 @@ void System::computeChemicalPotentials() {
       forces.interiorPenaltyPotential;
 }
 
+void System::computeNChemicalPotentials() {
+  for (int j = 0; j < pDensities.size(); ++j){
+    forces.interiorPenaltyPotentials.push_back(gcs::VertexData<double>(*geometry.mesh, 0));
+    forces.spontaneousCurvaturePotentials.push_back(gcs::VertexData<double>(*geometry.mesh, 0));
+    forces.deviatoricCurvaturePotentials.push_back(gcs::VertexData<double>(*geometry.mesh, 0));
+    forces.adsorptionPotentials.push_back(gcs::VertexData<double>(*geometry.mesh, 0));
+    forces.dirichletPotentials.push_back(gcs::VertexData<double>(*geometry.mesh, 0));
+    forces.aggregationPotentials.push_back(gcs::VertexData<double>(*geometry.mesh, 0));
+    forces.entropyPotentials.push_back(gcs::VertexData<double>(*geometry.mesh, 0));
+    forces.chemicalPotentials .push_back(gcs::VertexData<double>(*geometry.mesh, 0));
+
+
+    gcs::VertexData<double> dH0dphi(*geometry.mesh, 0);
+    gcs::VertexData<double> dKbdphi(*geometry.mesh, 0);
+    gcs::VertexData<double> dKddphi(*geometry.mesh, 0);
+    auto meanCurvDiff = (geometry.vpg->vertexMeanCurvatures.raw().array() /
+                        geometry.vpg->vertexDualAreas.raw().array()) -
+                        H0.raw().array();
+
+    if (parameters.bending.relation == "linear") {
+      dH0dphi.fill(parameters.bending.H0c);
+      dKbdphi.fill(parameters.bending.Kbc);
+      dKddphi.fill(parameters.bending.Kdc);
+    } else if (parameters.bending.relation == "hill") {
+      EigenVectorX1d proteinDensitySq =
+          (pDensities[j].raw().array() * pDensities[j].raw().array()).matrix();
+      dH0dphi.raw() =
+          (2 * parameters.bending.H0c * pDensities[j].raw().array() /
+          ((1 + proteinDensitySq.array()) * (1 + proteinDensitySq.array())))
+              .matrix();
+      dKbdphi.raw() =
+          (2 * parameters.bending.Kbc * pDensities[j].raw().array() /
+          ((1 + proteinDensitySq.array()) * (1 + proteinDensitySq.array())))
+              .matrix();
+      dKddphi.raw() =
+          (2 * parameters.bending.Kdc * pDensities[j].raw().array() /
+          ((1 + proteinDensitySq.array()) * (1 + proteinDensitySq.array())))
+              .matrix();
+  }
+
+    if (parameters.bending.Kb != 0 || parameters.bending.Kbc != 0) {
+      forces.spontaneousCurvaturePotentials[j].raw() = forces.maskProtein(
+          -geometry.vpg->vertexDualAreas.raw().array() *
+          (meanCurvDiff * meanCurvDiff * dKbdphi.raw().array() -
+          2 * Kb.raw().array() * meanCurvDiff * dH0dphi.raw().array()));
+    }
+
+    if (parameters.bending.Kd != 0 || parameters.bending.Kdc != 0) {
+      forces.deviatoricCurvaturePotentials[j].raw() =
+          -dKddphi.raw().array() *
+          geometry.vpg->vertexGaussianCurvatures.raw().array().square() /
+          geometry.vpg->vertexDualAreas.raw().array();
+      // (geometry.vpg->vertexMeanCurvatures.raw().array().square() /
+      //      geometry.vpg->vertexDualAreas.raw().array() -
+      //  geometry.vpg->vertexGaussianCurvatures.raw().array());
+    }
+
+    if (pParameters[j].epsilon != 0)
+      forces.adsorptionPotentials[j].raw() =
+          forces.maskProtein(-pParameters[j].epsilon *
+                            geometry.vpg->vertexDualAreas.raw().array());
+
+    if (pParameters[j].chi != 0)
+      forces.aggregationPotentials[j].raw() = forces.maskProtein(
+          -32 * pParameters[j].chi * (pDensities[j].raw().array() - 1) *
+          (2 * pDensities[j].raw().array() - 1) * pDensities[j].raw().array() *
+          geometry.vpg->vertexDualAreas.raw().array());
+
+    if (parameters.entropy.xi != 0) {
+      forces.entropyPotentials[j].raw() =
+          forces.maskProtein(-pParameters[j].xi *
+                            (pDensities[j].raw().array().log() -
+                              (1 - pDensities[j].raw().array()).log()) *
+                            geometry.vpg->vertexDualAreas.raw().array());
+      // forces.entropyPotential.raw() = forces.maskProtein(
+      //     -parameters.entropy.xi * proteinDensity.raw().array().log() *
+      //     geometry.vpg->vertexDualAreas.raw().array());
+    }
+
+    if (parameters.dirichlet.eta != 0)
+      forces.dirichletPotentials[j].raw() =
+          forces.maskProtein(-pParameters[j].eta *
+                            geometry.vpg->cotanLaplacian * proteinDensity.raw());
+
+    if (parameters.protein.proteinInteriorPenalty != 0) {
+      // Doing some tricks to penalize
+      EigenVectorX1d a = 1 / pDensities[j].raw().array();
+      a = (a.array().isFinite()).select(a, 0);
+      EigenVectorX1d b = 1 / (1 - pDensities[j].raw().array());
+      b = (b.array().isFinite()).select(b, 0);
+      forces.interiorPenaltyPotentials[j].raw() = forces.maskProtein(
+          pParameters[j].proteinInteriorPenalty * (a.array() - b.array()));
+    }
+
+    forces.chemicalPotentials[j] =
+        forces.adsorptionPotentials[j] + forces.aggregationPotentials[j] +
+        forces.entropyPotentials[j] + forces.spontaneousCurvaturePotentials[j] +
+        forces.deviatoricCurvaturePotentials[j] + forces.dirichletPotentials[j] +
+        forces.interiorPenaltyPotentials[j];
+  }
+}
+
 EigenVectorX1d
 System::computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential) {
   gcs::EdgeData<double> edgeProteinDensity(*geometry.mesh, 0);
@@ -407,6 +543,19 @@ System::computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential) {
     gc::Halfedge he = e.halfedge();
     edgeProteinDensity[i] = 0.5 * (proteinDensity[he.tailVertex()] +
                                    proteinDensity[he.tipVertex()]);
+  }
+  return geometry.vpg->hodge1 * edgeProteinDensity.raw().asDiagonal() *
+         geometry.vpg->d0 * geometry.vpg->hodge0Inverse * chemicalPotential;
+}
+
+EigenVectorX1d
+System::computeInPlaneFluxForm(gcs::VertexData<double> &pDensity, EigenVectorX1d &chemicalPotential){
+  gcs::EdgeData<double> edgeProteinDensity(*geometry.mesh, 0);
+  for (std::size_t i = 0; i < geometry.mesh->nEdges(); ++i) {
+    gc::Edge e{geometry.mesh->edge(i)};
+    gc::Halfedge he = e.halfedge();
+    edgeProteinDensity[i] = 0.5 * (pDensity[he.tailVertex()] +
+                                   pDensity[he.tipVertex()]);
   }
   return geometry.vpg->hodge1 * edgeProteinDensity.raw().asDiagonal() *
          geometry.vpg->d0 * geometry.vpg->hodge0Inverse * chemicalPotential;
@@ -665,6 +814,12 @@ void System::computeConservativeForcing() {
   // total chemical potential is summed inside function call
   if (parameters.variation.isProteinVariation) {
     computeChemicalPotentials();
+  }
+
+  for (int j = 0; j < pDensities.size(); ++j){
+    if (pParameters[j].isProteinVariation) {
+      computeNChemicalPotentials();
+    }
   }
 }
 

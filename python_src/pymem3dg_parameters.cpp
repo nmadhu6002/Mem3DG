@@ -379,6 +379,44 @@ void init_parameters(py::module_ &pymem3dg) {
                            R"delim(
           get spring parameters
       )delim");
+
+  py::class_<nProteinParameters> pParameters(pymem3dg, "pParameters",
+                                          R"delim(
+        parameters for protein
+    )delim");
+  pParameters.def(py::init<>());
+  pParameters.def_readwrite("isProteinVariation", &nProteinParameters::isProteinVariation,
+                            R"delim(
+          get epsilon
+      )delim");
+  pParameters.def_readwrite("isProteinConservation", &nProteinParameters::isProteinConservation,
+                            R"delim(
+          get epsilon
+      )delim");
+  pParameters.def_readwrite("proteinInteriorPenalty", &nProteinParameters::proteinInteriorPenalty,
+                            R"delim(
+          get epsilon
+      )delim");
+  pParameters.def_readwrite("proteinMobility", &nProteinParameters::proteinMobility,
+                            R"delim(
+          get epsilon
+      )delim");
+  pParameters.def_readwrite("epsilon", &nProteinParameters::epsilon,
+                            R"delim(
+          get epsilon
+      )delim");
+  pParameters.def_readwrite("chi", &nProteinParameters::chi,
+                            R"delim(
+          get epsilon
+      )delim");
+  pParameters.def_readwrite("xi", &nProteinParameters::xi,
+                            R"delim(
+          get epsilon
+      )delim");
+  pParameters.def_readwrite("eta", &nProteinParameters::eta,
+                            R"delim(
+          get epsilon
+      )delim");
 }
 } // namespace integrator
 } // namespace solver

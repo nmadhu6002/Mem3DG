@@ -10,6 +10,36 @@ namespace gcs = ::geometrycentral::surface;
 namespace nc = ::netCDF;
 
 int main() {
+
+  std::vector<int*> vecs;
+
+  int foo[3]{6,7,10};
+
+  int a = 5;
+  vecs.push_back(&a);
+
+  int b = 6;
+  vecs.push_back(&b);
+
+  int &c = a;
+
+  std::cout << "c" << c << std::endl;
+
+  std::cout << &c << " " << &a << std::endl;
+
+  for (auto i : vecs)
+    std::cout << i  << ", "<< *i << std::endl;
+
+  c = 8;
+
+  for (auto i : vecs){
+    std::cout << i << ", " << *i << std::endl;
+    *i = 1;
+  }
+
+  for (auto i : vecs)
+    std::cout << i << ", " << *i << std::endl;
+
   // std::unique_ptr<gcs::ManifoldSurfaceMesh> mesh;
   // std::unique_ptr<gcs::VertexPositionGeometry> vpg;
   // std::tie(mesh, vpg) = mem3dg::icosphere(1, 0);

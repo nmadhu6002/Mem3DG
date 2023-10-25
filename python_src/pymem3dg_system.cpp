@@ -57,6 +57,14 @@ void init_system(py::module_ &pymem3dg) {
              R"delim(
         System constructor with Matrices
       )delim");
+  system.def(
+      py::init<Geometry &, std::vector<EigenVectorX1d>, EigenVectorX3dr &,
+               Parameters &, std::vector<nProteinParameters>, double>(),
+      py::arg("geometry"), py::arg("pDensities"), py::arg("velocity"),
+      py::arg("parameters"), py::arg("pParameters"), py::arg("time") = 0,
+      R"delim(
+        System constructor with Matrices
+      )delim");
   system.def(py::init<Geometry &, Parameters &, double>(), py::arg("geometry"),
              py::arg("parameters"), py::arg("time") = 0,
              R"delim(
@@ -136,7 +144,7 @@ void init_system(py::module_ &pymem3dg) {
   /**
    * @brief Method: force computation
    */
-  system.def("computeInPlaneFluxForm", &System::computeInPlaneFluxForm,
+  system.def("computeInPlaneFluxForm", py::overload_cast<EigenVectorX1d &>(&System::computeInPlaneFluxForm),
              py::arg("chemicalPotential"),
              R"delim(
             Compute in plane flux form from chemical potential

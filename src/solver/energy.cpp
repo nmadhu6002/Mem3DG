@@ -154,6 +154,12 @@ void System::computeAdsorptionEnergy() {
                             (geometry.vpg->vertexDualAreas.raw().array() *
                              proteinDensity.raw().array())
                                 .sum();
+  for (int j = 0; j < pDensities.size(); ++j){
+    energy.adsorptionEnergy += pParameters[j].epsilon *
+                              (geometry.vpg->vertexDualAreas.raw().array() *
+                               pDensities[j].raw().array())
+                                  .sum();
+  }
 }
 
 void System::computeAggregationEnergy() {
@@ -162,6 +168,14 @@ void System::computeAggregationEnergy() {
       (geometry.vpg->vertexDualAreas.raw().array() *
        ((2 * proteinDensity.raw().array() - 1).square() - 1).square())
           .sum();
+
+  for (int j = 0; j < pDensities.size(); ++j){
+    energy.aggregationEnergy +=
+        pParameters[j].chi *
+        (geometry.vpg->vertexDualAreas.raw().array() *
+         ((2 * pDensities[j].raw().array() - 1).square() - 1).square())
+            .sum();
+  }
   // energy.aggregationEnergy =
   //     parameters.aggregation.chi *
   //     (geometry.vpg->vertexDualAreas.raw().array() *
@@ -178,6 +192,16 @@ void System::computeEntropyEnergy() {
         (1 - proteinDensity.raw().array()).log() *
             (1 - proteinDensity.raw().array())))
           .sum();
+
+  for (int j = 0; j < pDensities.size(); ++j){
+    energy.entropyEnergy +=
+        pParameters[j].xi *
+        (geometry.vpg->vertexDualAreas.raw().array() *
+         (pDensities[j].raw().array().log() * pDensities[j].raw().array() +
+          (1 - pDensities[j].raw().array()).log() *
+              (1 - pDensities[j].raw().array())))
+            .sum();
+  }
   // energy.entropyEnergy =
   //     parameters.entropy.xi *
   //     (geometry.vpg->vertexDualAreas.raw().array() *
@@ -196,6 +220,16 @@ void System::computeProteinInteriorPenalty() {
 
   energy.proteinInteriorPenalty =
       -parameters.protein.proteinInteriorPenalty * (a.sum() + b.sum());
+
+  for (int j = 0; j < pDensities.size(); ++j){
+    EigenVectorX1d a = pDensities[j].raw().array().log();
+    a = (a.array().isFinite()).select(a, 0);
+    EigenVectorX1d b = (1 - pDensities[j].raw().array()).log();
+    b = (b.array().isFinite()).select(b, 0);
+
+    energy.proteinInteriorPenalty +=
+        -pParameters[j].proteinInteriorPenalty * (a.sum() + b.sum());
+  }
 }
 
 void System::computeSelfAvoidanceEnergy() {
@@ -256,6 +290,14 @@ void System::computeDirichletEnergy() {
     energy.dirichletEnergy += 0.5 * parameters.dirichlet.eta *
                               proteinDensityGradient[f].norm2() *
                               geometry.vpg->faceAreas[f];
+  }
+
+  for (int j = 0; j < pDensities.size(); ++j){
+    for (gcs::Face f : geometry.mesh->faces()) {
+      energy.dirichletEnergy += 0.5 * pParameters[j].eta *
+                                pDensityGradients[j][f].norm2() *
+                                geometry.vpg->faceAreas[f];
+    }
   }
 
   // alternative dirichlet energy after integration by part

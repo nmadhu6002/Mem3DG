@@ -230,6 +230,26 @@ void Euler::march() {
                                .sum();
   }
 
+  for (int j = 0; j < system.pDensities.size(); ++j){
+    if (system.pParameters[j].isProteinVariation) {
+      if (system.pParameters[j].isProteinConservation) {
+        system.pRatesOfChange[j].raw() =
+            system.pParameters[j].proteinMobility *
+            system.geometry.vpg->hodge0Inverse *
+            system.geometry.vpg->d0.transpose() *
+            system.computeInPlaneFluxForm(system.pDensities[j],
+                system.forces.chemicalPotentials[j].raw());
+      } else {
+        system.proteinRateOfChange = system.pParameters[j].proteinMobility *
+                                     system.forces.chemicalPotentials[j] /
+                                     system.geometry.vpg->vertexDualAreas;
+      }
+      system.chemErrorNorms[j] = (system.pRatesOfChange[j].raw().array() *
+                              system.forces.chemicalPotentials[j].raw().array())
+                                 .sum();
+    }
+  }
+
   // adjust time step if adopt adaptive time step based on mesh size
   if (ifAdaptiveStep) {
     characteristicTimeStep = getAdaptiveCharacteristicTimeStep();
@@ -245,12 +265,21 @@ void Euler::march() {
       timeStep_chem =
           chemicalBacktrack(system.proteinRateOfChange.raw(), rho, c1);
     timeStep = std::min(timeStep_chem, timeStep_mech);
+    for (int j = 0; j < system.pDensities.size(); ++j){
+      if (system.pParameters[j].isProteinVariation)
+        timeStep_chem =
+            chemicalBacktrack(system.pRatesOfChange[j].raw(), rho, c1);
+      timeStep = std::min(timeStep, std::min(timeStep_chem, timeStep_mech));
+    }
     // (timeStep_chem < timeStep_mech) ? timeStep_chem : timeStep_mech;
   } else {
     timeStep = characteristicTimeStep;
   }
   system.geometry.vpg->inputVertexPositions += system.velocity * timeStep;
   system.proteinDensity += system.proteinRateOfChange * timeStep;
+  for (int j = 0; j < system.pDensities.size(); ++j){
+    system.pDensities[j] += system.pRatesOfChange[j] * timeStep;
+  }
   system.time += timeStep;
 
   // recompute cached values

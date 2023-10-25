@@ -155,6 +155,23 @@ struct Forces {
   /// Cached chemical potential
   gcs::VertexData<double> chemicalPotential;
 
+  /// Cached interior penalty chemical potential
+  std::vector<gcs::VertexData<double>> interiorPenaltyPotentials;
+  /// Cached spontaneous curvature related chemical potential
+  std::vector<gcs::VertexData<double>> spontaneousCurvaturePotentials;
+  /// Cached deviatoric curvature related chemical potential
+  std::vector<gcs::VertexData<double>> deviatoricCurvaturePotentials;
+  /// Cached adsorption related chemical potential
+  std::vector<gcs::VertexData<double>> adsorptionPotentials;
+  /// Cached dirichlet energy related chemical potential
+  std::vector<gcs::VertexData<double>> dirichletPotentials;
+  /// Cached aggregation related chemical potential
+  std::vector<gcs::VertexData<double>> aggregationPotentials;
+  /// Cached entropy related chemical potential
+  std::vector<gcs::VertexData<double>> entropyPotentials;
+  /// Cached chemical potential
+  std::vector<gcs::VertexData<double>> chemicalPotentials;
+
   /// @brief Force mask for limiting force direction e.g., enforcing boundary
   /// conditions
   gcs::VertexData<gc::Vector3> forceMask;

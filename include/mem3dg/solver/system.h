@@ -51,6 +51,7 @@
 #include "mem3dg/solver/geometry.h"
 #include "mem3dg/solver/mesh_process.h"
 #include "mem3dg/solver/parameters.h"
+#include "mem3dg/solver/nparameters.h"
 #ifdef MEM3DG_WITH_NETCDF
 #include "mem3dg/solver/mutable_trajfile.h"
 #include "mem3dg/solver/trajfile.h"
@@ -114,6 +115,8 @@ protected:
 public:
   /// Parameters
   Parameters parameters;
+  /// Multiple Protein Parameters
+  std::vector<nProteinParameters> pParameters;
   /// Mesh processor
   MeshProcessor meshProcessor;
   /// Geometry
@@ -129,14 +132,22 @@ public:
   double mechErrorNorm;
   /// chemical error norm
   double chemErrorNorm;
+  std::vector<double> chemErrorNorms;
   /// Cached protein surface density
   gcs::VertexData<double> proteinDensity;
   /// Spontaneous curvature gradient of the mesh
   gcs::FaceData<gc::Vector3> proteinDensityGradient;
+
+  std::vector<gcs::VertexData<double>> pDensities;
+  std::vector<gcs::FaceData<gc::Vector3>> pDensityGradients;
+
   /// Cached vertex velocity
   gcs::VertexData<gc::Vector3> velocity;
   /// Cached vertex protein rate of change
   gcs::VertexData<double> proteinRateOfChange;
+
+  std::vector<gcs::VertexData<double>> pRatesOfChange;
+
   /// Spontaneous curvature of the mesh
   gcs::VertexData<double> H0;
   /// Bending rigidity of the membrane
@@ -204,6 +215,45 @@ public:
          EigenVectorX3dr &velocity_, Parameters &p, double time_ = 0)
       : System(geometry_, proteinDensity_, velocity_, time_) {
     parameters = p;
+  }
+
+  System(Geometry &geometry_, std::vector<EigenVectorX1d> pDensities_,
+         EigenVectorX3dr &velocity_, Parameters &p,
+         std::vector<nProteinParameters> pParameters_, double time_ = 0)
+      : geometry(geometry_), forces(geometry), time(time_) {
+    int n = pDensities_.size();
+    energy = Energy({time, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    proteinDensity = gc::VertexData<double>(*geometry.mesh, 1);
+    proteinDensityGradient =
+        gcs::FaceData<gc::Vector3>(*geometry.mesh, {0, 0, 0});
+    velocity = gcs::VertexData<gc::Vector3>(*geometry.mesh, {0, 0, 0});
+    proteinRateOfChange = gcs::VertexData<double>(*geometry.mesh, 0);
+    H0 = gcs::VertexData<double>(*geometry.mesh);
+    Kb = gcs::VertexData<double>(*geometry.mesh);
+    Kd = gcs::VertexData<double>(*geometry.mesh);
+
+    chemErrorNorm = 0;
+    mechErrorNorm = 0;
+
+    isSmooth = true;
+    mutationMarker = gc::VertexData<bool>(*geometry.mesh, false);
+    parameters = p;
+
+    for (int i = 0; i < n; ++i) {
+      chemErrorNorms.push_back(0);
+
+      pDensities.push_back(gc::VertexData<double>(*geometry.mesh, 1));
+      pDensityGradients.push_back(gcs::FaceData<gc::Vector3>(*geometry.mesh, {0, 0, 0}));
+      pRatesOfChange.push_back(gcs::VertexData<double>(*geometry.mesh, 0));
+
+      pDensities[i].raw() = pDensities_[i];
+
+      nProteinParameters blank;
+      pParameters.push_back(blank);
+
+      pParameters[i] = pParameters_[i];
+    }
+    toMatrix(velocity) = velocity_;
   }
 
   /**
@@ -402,10 +452,14 @@ public:
    */
   void computeChemicalPotentials();
 
+  void computeNChemicalPotentials();
+
   /**
    * @brief Compute in plane flux form on edge
    */
   EigenVectorX1d computeInPlaneFluxForm(EigenVectorX1d &chemicalPotential);
+
+  EigenVectorX1d computeInPlaneFluxForm(gcs::VertexData<double> &pDensity, EigenVectorX1d &chemicalPotential);
 
   // ==========================================================
   // ================        energy.cpp      ==================

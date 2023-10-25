@@ -103,6 +103,13 @@ void System::updateConfigurations() {
                                              proteinDensityGradient);
   }
 
+  for (int j = 0; j < pDensities.size(); ++j){
+    if (pParameters[j].eta != 0) {
+      geometry.computeFaceTangentialDerivative(pDensities[j],
+                                               pDensityGradients[j]);
+    }
+  }
+
   // Update protein density dependent quantities
   if (parameters.bending.relation == "linear") {
     H0.raw() = proteinDensity.raw() * parameters.bending.H0c;
@@ -110,6 +117,13 @@ void System::updateConfigurations() {
                parameters.bending.Kbc * proteinDensity.raw().array();
     Kd.raw() = parameters.bending.Kd +
                parameters.bending.Kdc * proteinDensity.raw().array();
+    for (int j = 0; j < pDensities.size(); ++j){
+      H0.raw() += pDensities[j].raw() * parameters.bending.H0c;
+      Kb.raw() = Kb.raw().array() + (parameters.bending.Kb +
+                 parameters.bending.Kbc * pDensities[j].raw().array());
+      Kd.raw() = Kd.raw().array() + (parameters.bending.Kd +
+                 parameters.bending.Kdc * pDensities[j].raw().array());
+    }
   } else if (parameters.bending.relation == "hill") {
     EigenVectorX1d proteinDensitySq =
         (proteinDensity.raw().array() * proteinDensity.raw().array()).matrix();
@@ -121,6 +135,19 @@ void System::updateConfigurations() {
     Kd.raw() = parameters.bending.Kd + parameters.bending.Kdc *
                                            proteinDensitySq.array() /
                                            (1 + proteinDensitySq.array());
+    for (int j = 0; j < pDensities.size(); ++j){
+      EigenVectorX1d proteinDensitySq =
+          (pDensities[j].raw().array() * pDensities[j].raw().array())
+              .matrix();
+      H0.raw() = H0.raw().array() + parameters.bending.H0c * proteinDensitySq.array() /
+                 (1 + proteinDensitySq.array());
+      Kb.raw() = Kb.raw().array() + parameters.bending.Kb + parameters.bending.Kbc *
+                                             proteinDensitySq.array() /
+                                             (1 + proteinDensitySq.array());
+      Kd.raw() = Kd.raw().array() + parameters.bending.Kd + parameters.bending.Kdc *
+                                             proteinDensitySq.array() /
+                                             (1 + proteinDensitySq.array());
+    }
   } else {
     mem3dg_runtime_error("updateVertexPosition: P.relation is invalid option!");
   }
