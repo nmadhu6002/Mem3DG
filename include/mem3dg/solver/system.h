@@ -220,7 +220,7 @@ public:
   System(Geometry &geometry_, std::vector<EigenVectorX1d> pDensities_,
          EigenVectorX3dr &velocity_, Parameters &p,
          std::vector<nProteinParameters> pParameters_, double time_ = 0)
-      : geometry(geometry_), forces(geometry), time(time_) {
+      : geometry(geometry_), forces(geometry, pDensities_.size()), time(time_) {
     int n = pDensities_.size();
     energy = Energy({time, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
     proteinDensity = gc::VertexData<double>(*geometry.mesh, 1);

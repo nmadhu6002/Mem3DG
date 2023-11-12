@@ -74,7 +74,7 @@ void System::computeGeometricForces(size_t i) {
   double proteinDensityi = proteinDensity[i];
   std::vector<double> pDensitiesi;
   for (int j = 0; j < n; ++j) {
-    pDensitiesi[j] = pDensities[j][i];
+    pDensitiesi.push_back(pDensities[j][i]);
   }
   double areaDifferenceK =
       0.25 * parameters.bending.alpha * parameters.bending.Kb * constants::PI;
@@ -99,7 +99,7 @@ void System::computeGeometricForces(size_t i) {
     double proteinDensityj = proteinDensity[i_vj];
     std::vector<double> pDensitiesj;
     for (int j = 0; j < n; ++j) {
-      pDensitiesj[j] = pDensities[j][i_vj];
+      pDensitiesj.push_back(pDensities[j][i_vj]);
     }
     bool interiorHalfedge = he.isInterior();
     bool boundaryEdge = he.edge().isBoundary();

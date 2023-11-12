@@ -73,3 +73,6 @@ target_link_libraries(ddg_patch PRIVATE mem3dg)
 
 add_executable(scratch_ctl scratch_ctl.cpp)
 target_link_libraries(scratch_ctl PRIVATE mem3dg)
+
+add_executable(scratch_ctl2 scratch_ctl2.cpp)
+target_link_libraries(scratch_ctl2 PRIVATE mem3dg)
