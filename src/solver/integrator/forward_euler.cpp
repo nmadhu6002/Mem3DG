@@ -240,7 +240,7 @@ void Euler::march() {
             system.computeInPlaneFluxForm(system.pDensities[j],
                 system.forces.chemicalPotentials[j].raw());
       } else {
-        system.proteinRateOfChange = system.pParameters[j].proteinMobility *
+        system.pRatesOfChange[j] = system.pParameters[j].proteinMobility *
                                      system.forces.chemicalPotentials[j] /
                                      system.geometry.vpg->vertexDualAreas;
       }
@@ -268,7 +268,7 @@ void Euler::march() {
     for (int j = 0; j < system.pDensities.size(); ++j){
       if (system.pParameters[j].isProteinVariation)
         timeStep_chem =
-            chemicalBacktrack(system.pRatesOfChange[j].raw(), rho, c1);
+            NchemicalBacktrack(system.pRatesOfChange[j].raw(), j, rho, c1);
       timeStep = std::min(timeStep, std::min(timeStep_chem, timeStep_mech));
     }
     // (timeStep_chem < timeStep_mech) ? timeStep_chem : timeStep_mech;

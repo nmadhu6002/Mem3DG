@@ -35,6 +35,12 @@ double Integrator::getAdaptiveCharacteristicTimeStep() {
           ? system.forces.mechanicalForce.raw().cwiseAbs().maxCoeff()
           : system.forces.chemicalPotential.raw().cwiseAbs().maxCoeff();
 
+  for (int j = 0; j < system.pDensities.size(); ++j){
+    if (system.forces.chemicalPotentials[j].raw().cwiseAbs().maxCoeff() > currentMaximumForce){
+      currentMaximumForce = system.forces.chemicalPotentials[j].raw().cwiseAbs().maxCoeff();
+    }
+  }
+
   double dt = (dt_size2_ratio * currentMinimumSize * currentMinimumSize) *
               (initialMaximumForce / currentMaximumForce);
 
@@ -266,6 +272,85 @@ double Integrator::chemicalBacktrack(
   return alpha;
 }
 
+double Integrator::NchemicalBacktrack(
+    Eigen::Matrix<double, Eigen::Dynamic, 1> &chemicalDirection, 
+    int i, double rho, double c1) {
+
+  // cache energy of the last time step
+  const Energy previousE = system.energy;
+
+  // validate the directions
+  double chemicalProjection = 0;
+  chemicalProjection = (system.forces.chemicalPotentials[i].raw().array() *
+                        chemicalDirection.array())
+                           .sum();
+  if (chemicalProjection < 0) {
+    mem3dg_runtime_warning("chemical evolution on energy "
+                           "uphill direction!");
+  }
+  // calculate initial energy as reference level
+  gc::VertexData<gc::Vector3> initial_pos(*system.geometry.mesh);
+  initial_pos = system.geometry.vpg->inputVertexPositions;
+  gc::VertexData<double> initial_protein(*system.geometry.mesh,
+                                         system.pDensities[i].raw());
+  const double init_time = system.time;
+
+  // declare variables used in backtracking iterations
+  double alpha = characteristicTimeStep;
+  std::size_t count = 0;
+
+  // zeroth iteration
+  system.pDensities[i].raw() += alpha * chemicalDirection;
+  system.time += alpha;
+  system.updateConfigurations();
+  system.computePotentialEnergy();
+
+  while (true) {
+    // Wolfe condition fulfillment
+    if (system.energy.potentialEnergy <=
+        (previousE.potentialEnergy - c1 * alpha * chemicalProjection)) {
+      break;
+    }
+
+    // limit of backtraking iterations
+    if (alpha < 1e-5 * characteristicTimeStep) {
+      std::cout << "\n(time=" << system.time
+                << ") chemicalBacktrack: line search failure! Simulation "
+                   "stopped."
+                << std::endl;
+      system.backtraceEnergyGrowth(alpha, previousE);
+      // recover the initial configuration
+      system.time = init_time;
+      system.pDensities[i] = initial_protein;
+      system.geometry.vpg->inputVertexPositions = initial_pos;
+      system.testConservativeForcing(alpha);
+      system.testConservativeForcing(characteristicTimeStep);
+      EXIT = true;
+      SUCCESS = false;
+      break;
+    }
+
+    // backtracking time step
+    alpha *= rho;
+    system.pDensities[i].raw() =
+        initial_protein.raw() + alpha * chemicalDirection;
+    system.time = init_time + alpha;
+    system.updateConfigurations();
+    system.computePotentialEnergy();
+
+    // count the number of iterations
+    count++;
+  }
+
+  // recover the initial configuration
+  system.time = init_time;
+  system.pDensities[i] = initial_protein;
+  system.geometry.vpg->inputVertexPositions = initial_pos;
+  system.updateConfigurations();
+  system.computePotentialEnergy();
+  return alpha;
+}
+
 double Integrator::mechanicalBacktrack(
     Eigen::Matrix<double, Eigen::Dynamic, 3> &&positionDirection, double rho,
     double c1) {
@@ -289,6 +374,13 @@ double Integrator::mechanicalBacktrack(
   initial_pos = system.geometry.vpg->inputVertexPositions;
   gc::VertexData<double> initial_protein(*system.geometry.mesh,
                                          system.proteinDensity.raw());
+
+  std::vector<gc::VertexData<double>> initial_proteins;
+  for (int j = 0; j < system.pDensities.size(); ++j){
+    initial_proteins.push_back(gc::VertexData<double>(*system.geometry.mesh, 
+                                                      system.pDensities[j].raw()));
+  }
+
   const double init_time = system.time;
 
   // declare variables used in backtracking iterations
@@ -321,6 +413,11 @@ double Integrator::mechanicalBacktrack(
       // recover the initial configuration
       system.time = init_time;
       system.proteinDensity = initial_protein;
+
+      for (int j = 0; j < system.pDensities.size(); ++j){
+        system.pDensities[j] = initial_proteins[j];
+      }
+
       system.geometry.vpg->inputVertexPositions = initial_pos;
       system.testConservativeForcing(alpha);
       system.testConservativeForcing(characteristicTimeStep);
@@ -345,6 +442,11 @@ double Integrator::mechanicalBacktrack(
   // recover the initial configuration
   system.time = init_time;
   system.proteinDensity = initial_protein;
+
+  for (int j = 0; j < system.pDensities.size(); ++j) {
+    system.pDensities[j] = initial_proteins[j];
+  }
+
   system.geometry.vpg->inputVertexPositions = initial_pos;
   system.updateConfigurations();
   system.computePotentialEnergy();
@@ -408,7 +510,14 @@ void Integrator::saveData(bool ifOutputTrajFile, bool ifOutputMeshFile,
                .sum()
         << "\n"
         << "H0: [" << system.H0.raw().minCoeff() << ","
-        << system.H0.raw().maxCoeff() << "]" << std::endl;
+        << system.H0.raw().maxCoeff() << "]"
+        << "\n"
+        << "pDensities: ";
+
+    for (int j = 0; j < system.pDensities.size(); ++j){
+      std::cout << "[" << system.pDensities[j].raw().minCoeff() << "," << system.pDensities[j].raw().maxCoeff() << "] ";
+    }
+    std::cout << std::endl;
 
     // report the backtracking if verbose
     if (timeStep != characteristicTimeStep && ifPrintToConsole) {

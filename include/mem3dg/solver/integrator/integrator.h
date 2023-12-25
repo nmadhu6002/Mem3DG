@@ -234,6 +234,10 @@ public:
   chemicalBacktrack(Eigen::Matrix<double, Eigen::Dynamic, 1> &chemicalDirection,
                     double rho = 0.7, double c1 = 0);
 
+  double
+  NchemicalBacktrack(Eigen::Matrix<double, Eigen::Dynamic, 1> &chemicalDirection,
+                    int i, double rho = 0.7, double c1 = 0);
+
   /**
    * @brief get adaptive characteristic time step
    * @return characteristic time step
