@@ -223,7 +223,7 @@ public:
       : geometry(geometry_), forces(geometry, pDensities_.size()), time(time_) {
     int n = pDensities_.size();
     energy = Energy({time, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
-    proteinDensity = gc::VertexData<double>(*geometry.mesh, 1);
+    proteinDensity = gc::VertexData<double>(*geometry.mesh, 0);
     proteinDensityGradient =
         gcs::FaceData<gc::Vector3>(*geometry.mesh, {0, 0, 0});
     velocity = gcs::VertexData<gc::Vector3>(*geometry.mesh, {0, 0, 0});
