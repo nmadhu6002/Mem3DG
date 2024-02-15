@@ -53,6 +53,14 @@ struct nProteinParameters {
     double xi = 0;
     /// Smooothing coefficients
     double eta = 0;
+    /// Constant of bending modulus vs protein density
+    double Kbc = 0;
+    /// Constant of deviatoric modulus vs protein density
+    double Kdc = 0;
+    /// Constant of Spontaneous curvature vs protein density
+    double H0c = 0;
+    /// type of relation between H0 and protein density, "linear" or "hill"
+    std::string relation = "linear";
 };
 
 } // namespace solver

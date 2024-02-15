@@ -417,6 +417,22 @@ void init_parameters(py::module_ &pymem3dg) {
                             R"delim(
           get epsilon
       )delim");
+  pParameters.def_readwrite("Kbc", &nProteinParameters::Kbc,
+                            R"delim(
+          get epsilon
+      )delim");
+  pParameters.def_readwrite("Kdc", &nProteinParameters::Kdc,
+                            R"delim(
+          get epsilon
+      )delim");
+  pParameters.def_readwrite("H0c", &nProteinParameters::H0c,
+                            R"delim(
+          get epsilon
+      )delim");
+  pParameters.def_readwrite("relation", &nProteinParameters::relation,
+                            R"delim(
+          get epsilon
+      )delim");
 }
 } // namespace integrator
 } // namespace solver
