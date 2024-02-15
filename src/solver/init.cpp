@@ -83,13 +83,16 @@ void System::checkConfiguration() {
     } else {
       if (proteinDensity[0] != 1 || parameters.bending.Kb != 0 ||
           parameters.dirichlet.eta != 0 || parameters.adsorption.epsilon != 0 ||
-          parameters.aggregation.chi != 0)
+          parameters.aggregation.chi != 0){
+        if (pDensities.size() == 0){
         mem3dg_runtime_warning(
             "For homogeneous membrane simulation, good practice is to set "
             "proteinDensity = 1, Kb = 0, eta  = 0, "
             "epsilon = 0, chi = "
             "0 to "
             "avoid ambiguity & save computation!");
+        }
+      }
     }
   }
 }
@@ -117,13 +120,6 @@ void System::updateConfigurations() {
                parameters.bending.Kbc * proteinDensity.raw().array();
     Kd.raw() = parameters.bending.Kd +
                parameters.bending.Kdc * proteinDensity.raw().array();
-    for (int j = 0; j < pDensities.size(); ++j){
-      H0.raw() += pDensities[j].raw() * parameters.bending.H0c;
-      Kb.raw() = Kb.raw().array() + (parameters.bending.Kb +
-                 parameters.bending.Kbc * pDensities[j].raw().array());
-      Kd.raw() = Kd.raw().array() + (parameters.bending.Kd +
-                 parameters.bending.Kdc * pDensities[j].raw().array());
-    }
   } else if (parameters.bending.relation == "hill") {
     EigenVectorX1d proteinDensitySq =
         (proteinDensity.raw().array() * proteinDensity.raw().array()).matrix();
@@ -135,21 +131,33 @@ void System::updateConfigurations() {
     Kd.raw() = parameters.bending.Kd + parameters.bending.Kdc *
                                            proteinDensitySq.array() /
                                            (1 + proteinDensitySq.array());
-    for (int j = 0; j < pDensities.size(); ++j){
-      EigenVectorX1d proteinDensitySq =
-          (pDensities[j].raw().array() * pDensities[j].raw().array())
-              .matrix();
-      H0.raw() = H0.raw().array() + parameters.bending.H0c * proteinDensitySq.array() /
-                 (1 + proteinDensitySq.array());
-      Kb.raw() = Kb.raw().array() + parameters.bending.Kb + parameters.bending.Kbc *
-                                             proteinDensitySq.array() /
-                                             (1 + proteinDensitySq.array());
-      Kd.raw() = Kd.raw().array() + parameters.bending.Kd + parameters.bending.Kdc *
-                                             proteinDensitySq.array() /
-                                             (1 + proteinDensitySq.array());
-    }
   } else {
     mem3dg_runtime_error("updateVertexPosition: P.relation is invalid option!");
+  }
+
+  // Update n protein density dependent quantitites
+  for (int j = 0; j < pDensities.size(); ++j){
+    if (pParameters[j].relation == "linear") {
+      H0.raw() = pDensities[j].raw() * pParameters[j].H0c;
+      Kb.raw() = parameters.bending.Kb +
+                 pParameters[j].Kbc * pDensities[j].raw().array();
+      Kd.raw() = parameters.bending.Kd +
+                 pParameters[j].Kdc * pDensities[j].raw().array();
+    }
+    else if (pParameters[j].relation == "hill") {
+      EigenVectorX1d pDensitiesSq =
+          (pDensities[j].raw().array() * pDensities[j].raw().array()).matrix();
+      H0.raw() = pParameters[j].H0c * pDensitiesSq.array() /
+                 (1 + pDensitiesSq.array());
+      Kb.raw() = parameters.bending.Kb + pParameters[j].Kbc *
+                                             pDensitiesSq.array() /
+                                             (1 + pDensitiesSq.array());
+      Kd.raw() = parameters.bending.Kd + pParameters[j].Kdc *
+                                             pDensitiesSq.array() /
+                                             (1 + pDensitiesSq.array());
+    } else {
+      mem3dg_runtime_error("updateVertexPosition: P.relation is invalid option!");
+    }
   }
 
   /// volume and osmotic pressure
