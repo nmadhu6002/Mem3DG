@@ -452,7 +452,7 @@ public:
    */
   void computeChemicalPotentials();
 
-  void computeNChemicalPotentials();
+  void computeNChemicalPotentials(int j);
 
   /**
    * @brief Compute in plane flux form on edge
