@@ -363,6 +363,25 @@ double System::computePotentialEnergy() {
     computeProteinInteriorPenalty();
   }
 
+  for (int j = 0; j < pDensities.size(); ++j){
+    if (pParameters[j].epsilon != 0) {
+      computeAdsorptionEnergy();
+    }
+    if (pParameters[j].chi != 0) {
+      computeAggregationEnergy();
+    }
+    if (pParameters[j].xi != 0) {
+      computeEntropyEnergy();
+    }
+    if (pParameters[j].eta != 0) {
+      computeDirichletEnergy();
+    }
+    if (pParameters[j].isProteinVariation &&
+        pParameters[j].proteinInteriorPenalty != 0) {
+      computeProteinInteriorPenalty();
+    }
+  }
+
   // summerize internal potential energy
   energy.potentialEnergy =
       energy.spontaneousCurvatureEnergy + energy.deviatoricCurvatureEnergy +
