@@ -90,6 +90,10 @@ void System::computeGeometricForces(size_t i) {
 
     gc::Vector3 dphi_ijk{he.isInterior() ? proteinDensityGradient[fID]
                                          : gc::Vector3{0, 0, 0}};
+    std::vector<gc::Vector3> dphi_ijks;
+    for (int j = 0; j < n; ++j){
+      dphi_ijks.push_back(gc::Vector3{he.isInterior() ? pDensityGradients[j][fID] : gc::Vector3{0, 0, 0}});
+    }
     double Aj = geometry.vpg->vertexDualAreas[i_vj];
     double Hj = geometry.vpg->vertexMeanCurvatures[i_vj] / Aj;
     double KGj = geometry.vpg->vertexGaussianCurvatures[i_vj] / Aj;
@@ -134,6 +138,14 @@ void System::computeGeometricForces(size_t i) {
                   proteinDensity, he) /
                   geometry.vpg->faceAreas[fID]
             : gc::Vector3{0.0, 0.0, 0.0};
+    std::vector<gc::Vector3> dirichletVecs;
+    for (int j = 0; j < n; j++){
+      dirichletVecs.push_back(interiorHalfedge
+                                  ? geometry.computeHalfedgeSquaredIntegratedDerivativeNormVariationVector(
+                                        pDensities[j], he) /
+                                        geometry.vpg->faceAreas[fID]
+                                  : gc::Vector3{0.0, 0.0, 0.0});
+    }
     gc::Vector3 gaussVarVec1 =
         boundaryVertex ? gc::Vector3{0.0, 0.0, 0.0}
                        : -geometry.computeCornerAngleVariation(he, he.vertex());
@@ -196,12 +208,12 @@ void System::computeGeometricForces(size_t i) {
       if (pParameters[j].epsilon != 0) // adsorption force
         adsorptionForceVec -= (pDensitiesi[j] / 3 + pDensitiesj[j] * 2 / 3) *
                               pParameters[j].epsilon * areaGrad;
-      if (parameters.aggregation.chi != 0) // aggregation force
+      if (pParameters[j].chi != 0) // aggregation force
         aggregationForceVec -=
             (pow(pow(2 * pDensitiesi[j] - 1, 2) - 1, 2) / 3 +
              pow(pow(2 * pDensitiesj[j] - 1, 2) - 1, 2) * 2 / 3) *
             pParameters[j].chi * areaGrad;
-      if (parameters.entropy.xi != 0) // entropy force
+      if (pParameters[j].xi != 0) // entropy force
         entropyForceVec -= ((pDensitiesi[j] * log(pDensitiesi[j]) +
                              (1 - pDensitiesi[j]) * log(1 - pDensitiesi[j])) /
                                 3 +
@@ -209,10 +221,10 @@ void System::computeGeometricForces(size_t i) {
                              (1 - pDensitiesj[j]) * log(1 - pDensitiesj[j])) *
                                 2 / 3) *
                            pParameters[j].xi * areaGrad;
-      if (parameters.dirichlet.eta != 0) // line capillary force
+      if (pParameters[j].eta != 0) // line capillary force
         lineCapillaryForceVec -=
             pParameters[j].eta *
-            (0.125 * dirichletVec - 0.5 * dphi_ijk.norm2() * oneSidedAreaGrad);
+            (0.125 * dirichletVecs[j] - 0.5 * dphi_ijks[j].norm2() * oneSidedAreaGrad);
     }
 
     if (parameters.bending.alpha != 0) // area difference force
