@@ -596,6 +596,12 @@ public:
     double vertex2GeoDist = geometry.geodesicDistance[vertex2];
     double vertex1Phi = proteinDensity[vertex1];
     double vertex2Phi = proteinDensity[vertex2];
+    std::vector<double> vertex1Phis;
+    std::vector<double> vertex2Phis;
+    for (int j = 0; j < pDensities.size(); j++){
+      vertex1Phis.push_back(pDensities[j][vertex1]);
+      vertex2Phis.push_back(pDensities[j][vertex2]);
+    }
 
     // bool vertex1PointTracker = geometry.notableVertex[vertex1];
     // bool vertex2PointTracker = geometry.notableVertex[vertex2];
@@ -615,6 +621,8 @@ public:
     geometry.geodesicDistance[newVertex] =
         0.5 * (vertex1GeoDist + vertex2GeoDist);
     proteinDensity[newVertex] = 0.5 * (vertex1Phi + vertex2Phi);
+    for (int j = 0; j < pDensities.size(); j++)
+      pDensities[j][newVertex] = 0.5 * (vertex1Phis[j] + vertex2Phis[j]);
     geometry.notableVertex[newVertex] = false;
     forces.forceMask[newVertex] = gc::Vector3{1, 1, 1};
     return newVertex;
@@ -643,6 +651,12 @@ public:
     double vertex2GeoDist = geometry.geodesicDistance[vertex2];
     double vertex1Phi = proteinDensity[vertex1];
     double vertex2Phi = proteinDensity[vertex2];
+    std::vector<double> vertex1Phis;
+    std::vector<double> vertex2Phis;
+    for (int j = 0; j < pDensities.size(); j++) {
+      vertex1Phis.push_back(pDensities[j][vertex1]);
+      vertex2Phis.push_back(pDensities[j][vertex2]);
+    }
     bool vertex1PointTracker = geometry.notableVertex[vertex1];
     bool vertex2PointTracker = geometry.notableVertex[vertex2];
 
@@ -668,6 +682,8 @@ public:
       geometry.geodesicDistance[newVertex] =
           0.5 * (vertex1GeoDist + vertex2GeoDist);
       proteinDensity[newVertex] = 0.5 * (vertex1Phi + vertex2Phi);
+      for (int j = 0; j < pDensities.size(); j++)
+        pDensities[j][newVertex] = 0.5 * (vertex1Phis[j] + vertex2Phis[j]);
       geometry.notableVertex[newVertex] =
           vertex1PointTracker || vertex2PointTracker;
     }
