@@ -518,6 +518,11 @@ void Integrator::saveData(bool ifOutputTrajFile, bool ifOutputMeshFile,
       std::cout << "[" << system.pDensities[j].raw().minCoeff() << "," << system.pDensities[j].raw().maxCoeff() << "] ";
     }
     std::cout << std::endl;
+    std::cout << "|e|Chems: ";
+    for (int j = 0; j < system.pDensities.size(); ++j){
+      std::cout << system.chemErrorNorms[j] << ", ";
+    }
+    std::cout << std::endl;
 
     // report the backtracking if verbose
     if (timeStep != characteristicTimeStep && ifPrintToConsole) {
@@ -558,10 +563,10 @@ void Integrator::createMutableNetcdfFile(bool isContinue) {
   // initialize netcdf traj file
   if (isContinue) {
     mutableTrajFile.open(outputDirectory + "/" + trajFileName,
-                         TrajFile::NcFile::write);
+                         TrajFile::NcFile::write, system.pDensities.size());
   } else {
     mutableTrajFile.createNewFile(outputDirectory + "/" + trajFileName,
-                                  TrajFile::NcFile::replace);
+                                  TrajFile::NcFile::replace, system.pDensities.size());
   }
   isMutableNetcdfFileCreated = true;
   // mutableTrajFile.writeMask(toMatrix(f.forces.forceMask).rowwise().sum());
@@ -591,6 +596,9 @@ void Integrator::saveMutableNetcdfData() {
   mutableTrajFile.writeRefCoords(frame, *system.geometry.refVpg);
   mutableTrajFile.writeTopology(frame, *system.geometry.mesh);
   mutableTrajFile.writeProteinDensity(frame, system.proteinDensity);
+  mutableTrajFile.writeNumProtein(frame, system.pDensities.size());
+  for (int j = 0; j < system.pDensities.size(); j++)
+    mutableTrajFile.writeProteinDensities(frame, system.pDensities[j], j);
   mutableTrajFile.writeNotableVertex(frame, system.geometry.notableVertex);
   mutableTrajFile.sync();
 }
