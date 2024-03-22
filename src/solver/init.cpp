@@ -44,6 +44,9 @@ void System::initialize(bool ifMutateMesh) {
   computeTotalEnergy();
   mechErrorNorm = toMatrix(forces.mechanicalForceVec).norm();
   chemErrorNorm = forces.chemicalPotential.raw().norm();
+  for (int j = 0; j < pDensities.size(); ++j){
+    chemErrorNorms[j] = forces.chemicalPotentials[j].raw().norm();
+  }
 }
 
 void System::checkConfiguration() {
@@ -138,21 +141,21 @@ void System::updateConfigurations() {
   // Update n protein density dependent quantitites
   for (int j = 0; j < pDensities.size(); ++j){
     if (pParameters[j].relation == "linear") {
-      H0.raw() = pDensities[j].raw() * pParameters[j].H0c;
-      Kb.raw() = parameters.bending.Kb +
+      H0.raw() = H0.raw() + pDensities[j].raw() * pParameters[j].H0c;
+      Kb.raw() = Kb.raw().array() +
                  pParameters[j].Kbc * pDensities[j].raw().array();
-      Kd.raw() = parameters.bending.Kd +
+      Kd.raw() = Kd.raw().array() +
                  pParameters[j].Kdc * pDensities[j].raw().array();
     }
     else if (pParameters[j].relation == "hill") {
       EigenVectorX1d pDensitiesSq =
           (pDensities[j].raw().array() * pDensities[j].raw().array()).matrix();
-      H0.raw() = pParameters[j].H0c * pDensitiesSq.array() /
+      H0.raw() = H0.raw().array() + pParameters[j].H0c * pDensitiesSq.array() /
                  (1 + pDensitiesSq.array());
-      Kb.raw() = parameters.bending.Kb + pParameters[j].Kbc *
+      Kb.raw() = Kb.raw().array() + pParameters[j].Kbc *
                                              pDensitiesSq.array() /
                                              (1 + pDensitiesSq.array());
-      Kd.raw() = parameters.bending.Kd + pParameters[j].Kdc *
+      Kd.raw() = Kd.raw().array() + pParameters[j].Kdc *
                                              pDensitiesSq.array() /
                                              (1 + pDensitiesSq.array());
     } else {
