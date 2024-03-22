@@ -156,7 +156,7 @@ public:
    * @param filename  Path to file to open
    * @param fMode     Mode to open file with
    */
-  void open(const std::string &filename, const NcFile::FileMode fMode) {
+  void open(const std::string &filename, const NcFile::FileMode fMode, int n = 0) {
     if ((fd != nullptr) && (fMode != NcFile::read)) {
       mem3dg_runtime_error("Cannot open an already opened ...");
     }
@@ -178,6 +178,11 @@ public:
     coord_var = traj_group.getVar(COORD_VAR);
     refcoord_var = traj_group.getVar(REFCOORD_VAR);
     phi_var = traj_group.getVar(PHI_VAR);
+    num_phi = traj_group.getVar("numProteins");
+    for (int j = 0; j < n; j++){
+      PHI_VARs.push_back("pDensities" + std::to_string(j));
+      phi_vars.push_back(traj_group.getVar(PHI_VARs[j]));
+    }
     vertex_var = traj_group.getVar(VERTEX_VAR);
     vel_var = traj_group.getVar(VEL_VAR);
     extF_var = traj_group.getVar(EXTF_VAR);
@@ -190,7 +195,7 @@ public:
    * @param fMode     Mode to create the file
    */
   void createNewFile(const std::string &filename,
-                     const NcFile::FileMode fMode) {
+                     const NcFile::FileMode fMode, int n = 0) {
     if (fd != nullptr) {
       mem3dg_runtime_error("Cannot open an already open ...");
     }
@@ -198,7 +203,7 @@ public:
     writeable = true;
 
     fd = new NcFile(filename, fMode);
-    initializeConventions();
+    initializeConventions(n);
   }
 
   /**
@@ -207,7 +212,7 @@ public:
    * @param filename    Path to file to create
    * @param ncFileMode  Mode to create the file
    */
-  void createNewFile(const std::string &filename, const int ncFileMode) {
+  void createNewFile(const std::string &filename, const int ncFileMode, int n = 0) {
     if (fd != nullptr) {
       mem3dg_runtime_error("Cannot open an already opened file.");
     }
@@ -216,7 +221,7 @@ public:
 
     fd = new NcFile();
     fd->create(filename, ncFileMode);
-    initializeConventions();
+    initializeConventions(n);
   }
 
 #pragma endregion initialization_helpers
@@ -249,6 +254,8 @@ public:
     coord_var = nc::NcVar{};
     refcoord_var = nc::NcVar{};
     phi_var = nc::NcVar{};
+    for (int j = 0; j < phi_vars.size(); j++)
+      phi_vars[j] = nc::NcVar{};
     vertex_var = nc::NcVar{};
     vel_var = nc::NcVar{};
     extF_var = nc::NcVar{};
@@ -388,6 +395,15 @@ public:
   void writeProteinDensity(const std::size_t idx,
                            const gc::MeshData<gc::Vertex, double> &data) {
     writeVar(phi_var, idx, data);
+  }
+
+  void writeProteinDensities(const std::size_t idx,
+                               const gc::MeshData<gc::Vertex, double> &data, int j) {
+    writeVar(phi_vars[j], idx, data);
+  }
+
+  void writeNumProtein(const std::size_t idx, const double num) {
+    writeVar(num_phi, idx, num);
   }
 
   /**
@@ -690,7 +706,7 @@ private:
   /**
    * @brief Initialize a new file with the given conventions
    */
-  void initializeConventions() {
+  void initializeConventions(int n = 0) {
 
     const int compression_level = 5;
 
@@ -717,6 +733,11 @@ private:
     refcoord_var = traj_group.addVar(REFCOORD_VAR, double_array_t, {frame_dim});
     vertex_var = traj_group.addVar(VERTEX_VAR, bool_array_t, {frame_dim});
     phi_var = traj_group.addVar(PHI_VAR, double_array_t, {frame_dim});
+    num_phi = traj_group.addVar("numProteins", netCDF::ncDouble, {frame_dim});
+    for (int j = 0; j < n; j++){
+      PHI_VARs.push_back("pDensities" + std::to_string(j));
+      phi_vars.push_back(traj_group.addVar(PHI_VARs[j], double_array_t, {frame_dim}));
+    }
     vel_var = traj_group.addVar(VEL_VAR, double_array_t, {frame_dim});
     extF_var = traj_group.addVar(EXTF_VAR, double_array_t, {frame_dim});
   }
@@ -746,6 +767,8 @@ private:
   nc::NcVar refcoord_var;
   /// Vlen variable for protein density
   nc::NcVar phi_var;
+  nc::NcVar num_phi;
+  std::vector<nc::NcVar> phi_vars;
   /// Vlen variable for notable vertex
   nc::NcVar vertex_var;
   /// Vlen variable for velocities

@@ -1009,6 +1009,11 @@ def animate(
         # Add Quantities
         vertexDualAreas = geometry.getVertexDualAreas()
         proteinDensity = dg_nc.getData(trajNc, frame, "Trajectory", "proteindensity", 1)
+        pDensities = []
+        numProteins = int(dg_nc.getData(trajNc, frame, "Trajectory", "numProteins", 1))
+        for j in range(numProteins):
+            name = "pDensities" + str(j)
+            pDensities.append(dg_nc.getData(trajNc, frame, "Trajectory", name, 1))
         velocity = dg_nc.getData(trajNc, frame, "Trajectory", "velocities", 3)
         if showBasics:
             psmesh.add_vector_quantity("velocity", velocity)
@@ -1020,6 +1025,15 @@ def animate(
                     cmap="coolwarm",
                     enabled=True,
                 )
+                for j in range(numProteins):
+                    name = "protein " + str(j+1)
+                    psmesh.add_scalar_quantity(
+                        name,
+                        pDensities[j],
+                        # vminmax=(-1, 1),  # keep the center (white) at 0
+                        cmap="coolwarm",
+                        enabled=True,
+                    )
             else:
                 proteinDensity = proteinDensity * vertexDualAreas
                 psmesh.add_scalar_quantity(
@@ -1028,6 +1042,15 @@ def animate(
                     enabled=True,
                     cmap="viridis",
                 )
+                for j in range(numProteins):
+                    proteinDensity = proteinDensity * vertexDualAreas
+                    name = "protein " + str(j+1)
+                    psmesh.add_scalar_quantity(
+                        name,
+                        pDensities[j],
+                        enabled=True,
+                        cmap="viridis",
+                    )
             if notableVertex:
                 psmesh.add_scalar_quantity("notableVertex", geometry.getNotableVertex())
             if meanCurvature:
