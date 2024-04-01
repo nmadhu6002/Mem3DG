@@ -106,7 +106,7 @@ void System::computeGeometricForces(size_t i) {
       pDensitiesj.push_back(pDensities[j][i_vj]);
     }
     bool interiorHalfedge = he.isInterior();
-    bool boundaryEdge = he.edge().isBoundary();
+    // bool boundaryEdge = he.edge().isBoundary();
     bool boundaryNeighborVertex = he.next().vertex().isBoundary();
 
     // compute fundamental variational vectors
@@ -578,7 +578,7 @@ void System::computeDPDForces(double dt) {
   // gcs::EdgeData<double> random_var(mesh);
   double sigma = sqrt(2 * parameters.dpd.gamma * mem3dg::constants::kBoltzmann *
                       parameters.temperature / dt);
-  std::normal_distribution<double> normal_dist(0, sigma);
+  normal_dist = std::normal_distribution<double>(0, sigma);
 
   for (gcs::Edge e : geometry.mesh->edges()) {
     gcs::Halfedge he = e.halfedge();
