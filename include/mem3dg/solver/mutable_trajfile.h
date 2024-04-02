@@ -155,7 +155,7 @@ public:
    * @param fn  Path to file to open
    * @param fMode     Mode to open file with
    */
-  void open(const std::string &filename, const NcFile::FileMode fMode, int n = 0) {
+  void open(const std::string &fn, const NcFile::FileMode fMode, int n = 0) {
     if ((fd != nullptr) && (fMode != NcFile::read)) {
       mem3dg_runtime_error("Cannot open an already opened ...");
     }
@@ -193,7 +193,7 @@ public:
    * @param fn  Path to file to create
    * @param fMode     Mode to create the file
    */
-  void createNewFile(const std::string &filename,
+  void createNewFile(const std::string &fn,
                      const NcFile::FileMode fMode, int n = 0) {
     if (fd != nullptr) {
       mem3dg_runtime_error("Cannot open an already open ...");
@@ -201,7 +201,7 @@ public:
 
     writeable = true;
 
-    fd = new NcFile(filename, fMode);
+    fd = new NcFile(fn, fMode);
     initializeConventions(n);
   }
 
@@ -211,7 +211,7 @@ public:
    * @param fn    Path to file to create
    * @param ncFileMode  Mode to create the file
    */
-  void createNewFile(const std::string &filename, const int ncFileMode, int n = 0) {
+  void createNewFile(const std::string &fn, const int ncFileMode, int n = 0) {
     if (fd != nullptr) {
       mem3dg_runtime_error("Cannot open an already opened file.");
     }
@@ -219,7 +219,7 @@ public:
     writeable = true;
 
     fd = new NcFile();
-    fd->create(filename, ncFileMode);
+    fd->create(fn, ncFileMode);
     initializeConventions(n);
   }
 
