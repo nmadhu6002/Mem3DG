@@ -76,6 +76,8 @@ struct Energy {
   double potentialEnergy = 0;
   /// spontaneous curvature energy of the membrane
   double spontaneousCurvatureEnergy = 0;
+  /// Gaussian curvature energy
+  double gaussianCurvatureEnergy = 0;
   /// deviatoric curvature energy of the membrane
   double deviatoricCurvatureEnergy = 0;
   /// area difference energy of the membrane
@@ -154,6 +156,8 @@ public:
   gcs::VertexData<double> Kb;
   /// deviatoric rigidity of the membrane
   gcs::VertexData<double> Kd;
+  /// gaussian modulus of the membrane
+  gcs::VertexData<double> Kg;
   /// is Smooth
   bool isSmooth;
   /// if being mutated
@@ -303,6 +307,7 @@ public:
     H0 = gcs::VertexData<double>(*geometry.mesh);
     Kb = gcs::VertexData<double>(*geometry.mesh);
     Kd = gcs::VertexData<double>(*geometry.mesh);
+    Kg = gcs::VertexData<double>(*geometry.mesh);
 
     chemErrorNorm = 0;
     mechErrorNorm = 0;
@@ -468,6 +473,11 @@ public:
    * @brief Compute spontaneous curvature energy
    */
   void computeSpontaneousCurvatureEnergy();
+
+  /**
+   * @brief Compute deviatoric curvature energy
+   */
+  void computeGaussianCurvatureEnergy();
 
   /**
    * @brief Compute deviatoric curvature energy

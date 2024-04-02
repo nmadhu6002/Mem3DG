@@ -122,6 +122,8 @@ void System::updateConfigurations() {
                parameters.bending.Kbc * proteinDensity.raw().array();
     Kd.raw() = parameters.bending.Kd +
                parameters.bending.Kdc * proteinDensity.raw().array();
+    Kg.raw() = parameters.bending.Kg +
+               parameters.bending.Kgc * proteinDensity.raw().array();
   } else if (parameters.bending.relation == "hill") {
     EigenVectorX1d proteinDensitySq =
         (proteinDensity.raw().array() * proteinDensity.raw().array()).matrix();
@@ -131,6 +133,9 @@ void System::updateConfigurations() {
                                            proteinDensitySq.array() /
                                            (1 + proteinDensitySq.array());
     Kd.raw() = parameters.bending.Kd + parameters.bending.Kdc *
+                                           proteinDensitySq.array() /
+                                           (1 + proteinDensitySq.array());
+    Kg.raw() = parameters.bending.Kg + parameters.bending.Kgc *
                                            proteinDensitySq.array() /
                                            (1 + proteinDensitySq.array());
   } else {
