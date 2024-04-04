@@ -426,6 +426,10 @@ void init_parameters(py::module_ &pymem3dg) {
                             R"delim(
           get epsilon
       )delim");
+  pParameters.def_readwrite("Kgc", &nProteinParameters::Kgc,
+                            R"delim(
+          get epsilon
+      )delim");
   pParameters.def_readwrite("Kbc", &nProteinParameters::Kbc,
                             R"delim(
           get epsilon

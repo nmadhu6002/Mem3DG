@@ -53,6 +53,8 @@ struct nProteinParameters {
     double xi = 0;
     /// Smooothing coefficients
     double eta = 0;
+    /// Constant of gaussian modulus vs protein density
+    double Kgc = 0;
     /// Constant of bending modulus vs protein density
     double Kbc = 0;
     /// Constant of deviatoric modulus vs protein density

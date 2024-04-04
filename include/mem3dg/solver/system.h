@@ -235,6 +235,7 @@ public:
     H0 = gcs::VertexData<double>(*geometry.mesh);
     Kb = gcs::VertexData<double>(*geometry.mesh);
     Kd = gcs::VertexData<double>(*geometry.mesh);
+    Kg = gcs::VertexData<double>(*geometry.mesh);
 
     chemErrorNorm = 0;
     mechErrorNorm = 0;

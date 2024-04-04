@@ -147,21 +147,26 @@ void System::updateConfigurations() {
     if (pParameters[j].relation == "linear") {
       H0.raw() = H0.raw() + pDensities[j].raw() * pParameters[j].H0c;
       Kb.raw() = Kb.raw().array() +
-                 pParameters[j].Kbc * pDensities[j].raw().array();
+                 (parameters.bending.Kb + pParameters[j].Kbc * pDensities[j].raw().array());
       Kd.raw() = Kd.raw().array() +
-                 pParameters[j].Kdc * pDensities[j].raw().array();
+                 (parameters.bending.Kd + pParameters[j].Kdc * pDensities[j].raw().array());
+      Kg.raw() = Kg.raw().array() +
+                 (parameters.bending.Kg + parameters.bending.Kgc * proteinDensity.raw().array());
     }
     else if (pParameters[j].relation == "hill") {
       EigenVectorX1d pDensitiesSq =
           (pDensities[j].raw().array() * pDensities[j].raw().array()).matrix();
       H0.raw() = H0.raw().array() + pParameters[j].H0c * pDensitiesSq.array() /
                  (1 + pDensitiesSq.array());
-      Kb.raw() = Kb.raw().array() + pParameters[j].Kbc *
-                                             pDensitiesSq.array() /
-                                             (1 + pDensitiesSq.array());
-      Kd.raw() = Kd.raw().array() + pParameters[j].Kdc *
-                                             pDensitiesSq.array() /
-                                             (1 + pDensitiesSq.array());
+      Kb.raw() = Kb.raw().array() + (parameters.bending.Kb + pParameters[j].Kbc *
+                                        pDensitiesSq.array() /
+                                        (1 + pDensitiesSq.array()));
+      Kd.raw() = Kd.raw().array() + (parameters.bending.Kd + pParameters[j].Kdc *
+                                        pDensitiesSq.array() /
+                                        (1 + pDensitiesSq.array()));
+      Kd.raw() = Kg.raw().array() + (parameters.bending.Kg + pParameters[j].Kgc *
+                                        pDensitiesSq.array() /
+                                        (1 + pDensitiesSq.array()));
     } else {
       mem3dg_runtime_error("updateVertexPosition: P.relation is invalid option!");
     }

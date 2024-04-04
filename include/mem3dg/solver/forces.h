@@ -165,6 +165,8 @@ struct Forces {
   std::vector<gcs::VertexData<double>> interiorPenaltyPotentials;
   /// Cached spontaneous curvature related chemical potential
   std::vector<gcs::VertexData<double>> spontaneousCurvaturePotentials;
+  /// Cached Gaussian curvature related chemical potential
+  std::vector<gcs::VertexData<double>> gaussianCurvaturePotentials;
   /// Cached deviatoric curvature related chemical potential
   std::vector<gcs::VertexData<double>> deviatoricCurvaturePotentials;
   /// Cached adsorption related chemical potential
@@ -232,6 +234,7 @@ struct Forces {
         conservativeForceVec(mesh, {0, 0, 0}),
         spontaneousCurvatureForceVec(mesh, {0, 0, 0}),
         areaDifferenceForceVec(mesh, {0, 0, 0}),
+        gaussianCurvatureForceVec(mesh, {0, 0, 0}),
         deviatoricCurvatureForceVec(mesh, {0, 0, 0}),
         deviatoricCurvatureForceVec_mean(mesh, {0, 0, 0}),
         deviatoricCurvatureForceVec_gauss(mesh, {0, 0, 0}),
@@ -245,8 +248,8 @@ struct Forces {
         selfAvoidanceForceVec(mesh, {0, 0, 0}),
         lineCapillaryForceVec(mesh, {0, 0, 0}),
         spontaneousCurvatureForce(mesh, 0), deviatoricCurvatureForce(mesh, 0),
-        areaDifferenceForce(mesh, 0), capillaryForce(mesh, 0),
-        surfaceTension(0), lineCapillaryForce(mesh, 0),
+        gaussianCurvatureForce(mesh, 0), areaDifferenceForce(mesh, 0),
+        capillaryForce(mesh, 0), surfaceTension(0), lineCapillaryForce(mesh, 0),
         adsorptionForce(mesh, 0), aggregationForce(mesh, 0),
         entropyForce(mesh, 0), externalForce(mesh, 0),
         selfAvoidanceForce(mesh, 0), osmoticForce(mesh, 0), osmoticPressure(0),
@@ -254,22 +257,24 @@ struct Forces {
         faceSpringForceVec(mesh, {0, 0, 0}), lcrSpringForceVec(mesh, {0, 0, 0}),
         stochasticForceVec(mesh, {0, 0, 0}), dampingForceVec(mesh, {0, 0, 0}),
         interiorPenaltyPotential(mesh, 0),
+        gaussianCurvaturePotential(mesh, 0),
         spontaneousCurvaturePotential(mesh, 0),
         deviatoricCurvaturePotential(mesh, 0), adsorptionPotential(mesh, 0),
         aggregationPotential(mesh, 0), entropyPotential(mesh, 0),
         dirichletPotential(mesh, 0), chemicalPotential(mesh, 0),
         forceMask(mesh, {1.0, 1.0, 1.0}), proteinMask(mesh, 1) {
-          for (int j = 0; j < n; ++j){
-            interiorPenaltyPotentials.push_back(gc::VertexData<double>(mesh, 0));
-            spontaneousCurvaturePotentials.push_back(gc::VertexData<double>(mesh, 0));
-            deviatoricCurvaturePotentials.push_back(gc::VertexData<double>(mesh, 0));
-            adsorptionPotentials.push_back(gc::VertexData<double>(mesh, 0));
-            dirichletPotentials.push_back(gc::VertexData<double>(mesh, 0));
-            aggregationPotentials.push_back(gc::VertexData<double>(mesh, 0));
-            entropyPotentials.push_back(gc::VertexData<double>(mesh, 0));
-            chemicalPotentials.push_back(gc::VertexData<double>(mesh, 0));
-          }
+        for (int j = 0; j < n; ++j) {
+          interiorPenaltyPotentials.push_back(gc::VertexData<double>(mesh, 0));
+          spontaneousCurvaturePotentials.push_back(gc::VertexData<double>(mesh, 0));
+          gaussianCurvaturePotentials.push_back(gc::VertexData<double>(mesh, 0));
+          deviatoricCurvaturePotentials.push_back(gc::VertexData<double>(mesh, 0));
+          adsorptionPotentials.push_back(gc::VertexData<double>(mesh, 0));
+          dirichletPotentials.push_back(gc::VertexData<double>(mesh, 0));
+          aggregationPotentials.push_back(gc::VertexData<double>(mesh, 0));
+          entropyPotentials.push_back(gc::VertexData<double>(mesh, 0));
+          chemicalPotentials.push_back(gc::VertexData<double>(mesh, 0));
         }
+  }
 
   ~Forces() {}
 
