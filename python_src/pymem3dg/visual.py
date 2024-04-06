@@ -1043,7 +1043,7 @@ def animate(
                     cmap="viridis",
                 )
                 for j in range(numProteins):
-                    proteinDensity = proteinDensity * vertexDualAreas
+                    pDensities[j] = pDensities[j] * vertexDualAreas
                     name = "protein " + str(j+1)
                     psmesh.add_scalar_quantity(
                         name,
