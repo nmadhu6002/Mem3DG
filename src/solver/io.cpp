@@ -135,6 +135,23 @@ System::readTrajFile(std::string trajFile, int startingFrame) {
   // return std::forward_as_tuple(Geometry(trajFile, startingFrame),
   // fd.getProteinDensity(startingFrame),  fd.getVelocity(startingFrame), time);
 }
+
+std::tuple<std::vector<EigenVectorX1d>, EigenVectorX3dr, double>
+System::nProteinReadTrajFile(std::string trajFile, int startingFrame, int n) {
+  // Geometry geometry_here(trajFile, startingFrame);
+  // std::unique_ptr<Geometry> geometry_here =
+  //     std::make_unique<Geometry>(trajFile, startingFrame);
+  MutableTrajFile fd = MutableTrajFile::openReadOnly(trajFile, n);
+  // Map continuation variables
+  double time_ = fd.getTime(startingFrame);
+  EigenVectorX3dr initialVelocity = fd.getVelocity(startingFrame);
+  std::vector<EigenVectorX1d> initialProteinDensities = fd.getProteinDensities(startingFrame);
+  // F.toMatrix(vel_protein) = fd.getProteinVelocity(startingFrame);
+
+  return std::make_tuple(initialProteinDensities, initialVelocity, time_);
+  // return std::forward_as_tuple(Geometry(trajFile, startingFrame),
+  // fd.getProteinDensity(startingFrame),  fd.getVelocity(startingFrame), time);
+}
 #endif
 
 } // namespace solver

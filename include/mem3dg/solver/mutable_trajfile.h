@@ -127,8 +127,8 @@ public:
    *
    * @return MutableTrajFile helper object to manipulate the bound NetCDF file.
    */
-  static MutableTrajFile openReadOnly(const std::string &fn) {
-    return MutableTrajFile(fn, NcFile::read);
+  static MutableTrajFile openReadOnly(const std::string &fn, int n = 0) {
+    return MutableTrajFile(fn, NcFile::read, n);
   };
 #pragma endregion named_constructors
 
@@ -405,6 +405,10 @@ public:
     writeVar(num_phi, idx, num);
   }
 
+  double getNumProtein(const std::size_t idx) const {
+    return getVar<double>(num_phi, idx);
+  }
+
   /**
    * @brief Get the protein density of a given frame
    *
@@ -413,6 +417,14 @@ public:
    */
   EigenVectorX1d getProteinDensity(const std::size_t idx) {
     return getVar1d<double>(phi_var, idx);
+  }
+
+  std::vector<EigenVectorX1d> getProteinDensities(const std::size_t idx) {
+    std::vector<EigenVectorX1d> res;
+    for (int j = 0; j < phi_vars.size(); j++){
+      res.push_back(getVar1d<double>(phi_vars[j], idx));
+    }
+    return res;
   }
 
   /**
@@ -681,10 +693,10 @@ private:
    * @param fn Path to file of interest
    * @param fMode    Mode to open/create file with
    */
-  MutableTrajFile(const std::string &fn, const NcFile::FileMode fMode)
+  MutableTrajFile(const std::string &fn, const NcFile::FileMode fMode, int n = 0)
       : fd(nullptr), filename(fn), writeable(fMode != NcFile::read) {
     if (fMode == NcFile::read || fMode == NcFile::write)
-      open(fn, fMode);
+      open(fn, fMode, n);
     else
       createNewFile(fn, fMode);
   }

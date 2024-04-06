@@ -77,6 +77,12 @@ void init_system(py::module_ &pymem3dg) {
              R"delim(
         System constructor with NetCDF trajectory file
       )delim");
+  system.def(py::init<Geometry &, std::string, int, Parameters &, std::vector<nProteinParameters>>(),
+             py::arg("geometry"), py::arg("trajFile"), py::arg("startingFrame"),
+             py::arg("parameters"), py::arg("pParameters"),
+             R"delim(
+        System constructor with NetCDF trajectory file
+      )delim");
 #endif
 
   /**
@@ -136,6 +142,9 @@ void init_system(py::module_ &pymem3dg) {
   system.def(
       "getProteinDensity", [](System &s) { return s.proteinDensity.raw(); },
       py::return_value_policy::copy, "get the protein Density");
+  system.def(
+      "getNumProteins", [](System &s) { return s.pDensities.size(); },
+      py::return_value_policy::copy, "get the number of proteins");
   system.def(
       "getProteinRateOfChange",
       [](System &s) { return s.proteinRateOfChange.raw(); },

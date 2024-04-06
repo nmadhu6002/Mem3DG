@@ -182,6 +182,9 @@ public:
       : System(geometry_, readTrajFile(trajFile, startingFrame), p){};
   // System(std::string trajFile, int startingFrame, Parameters &p)
   //     : System(readTrajFile(trajFile, startingFrame), p){};
+  System(Geometry &geometry_, std::string trajFile, int startingFrame,
+         Parameters &p, std::vector<nProteinParameters> pParameters_)
+      : System(geometry_, nProteinReadTrajFile(trajFile, startingFrame, pParameters_.size()), p, pParameters_){};
 #endif
 
 private:
@@ -198,6 +201,12 @@ private:
          std::tuple<EigenVectorX1d, EigenVectorX3dr, double> tuple,
          Parameters &p)
       : System(geometry_, std::get<0>(tuple), std::get<1>(tuple), p,
+               std::get<2>(tuple)) {}
+
+  System(Geometry &geometry_,
+         std::tuple<std::vector<EigenVectorX1d>, EigenVectorX3dr, double> tuple,
+         Parameters &p, std::vector<nProteinParameters> pParameters_)
+      : System(geometry_, std::get<0>(tuple), std::get<1>(tuple), p, pParameters_,
                std::get<2>(tuple)) {}
 
 public:
@@ -352,6 +361,8 @@ public:
   // readTrajFile(std::string trajFile, int startingFrame);
   std::tuple<EigenVectorX1d, EigenVectorX3dr, double>
   readTrajFile(std::string trajFile, int startingFrame);
+  std::tuple<std::vector<EigenVectorX1d>, EigenVectorX3dr, double>
+  nProteinReadTrajFile(std::string trajFile, int startingFrame, int n);
 #endif
 
   // ==========================================================

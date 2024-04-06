@@ -902,6 +902,7 @@ def visualizeGeometry(
 def animate(
     trajNc: str,
     parameters: Union[dg.Parameters, None] = None,
+    pParameters: Union[List, None] = None,
     frames: Union[range, List, None] = None,
     showBasics=False,
     showForce=False,
@@ -962,6 +963,7 @@ def animate(
         deviatoricCurvaturePotential(bool, optional): optional data to visualize. Defaults to True
     """
     hasParameters = parameters is not None
+    haspParameters = pParameters is not None
     if frames is None:
         frames = range(dg_nc.sizeOf(trajNc))
 
@@ -991,11 +993,18 @@ def animate(
             print(e)
             return
         if hasParameters:
-            try:
-                system = dg.System(geometry, trajNc, frame, parameters)
-            except Exception as e:
-                print(e)
-                return
+            if haspParameters:    
+                try:
+                    system = dg.System(geometry, trajNc, frame, parameters, pParameters)
+                except Exception as e:
+                    print(e)
+                    return
+            else:
+                try:
+                    system = dg.System(geometry, trajNc, frame, parameters)
+                except Exception as e:
+                    print(e)
+                    return
             system.initialize(ifMutateMesh=0)
             system.computeConservativeForcing()
             system.addNonconservativeForcing()

@@ -76,23 +76,23 @@ void System::checkConfiguration() {
     }
   }
 
-  if (((proteinDensity - proteinDensity[0]).raw().norm() == 0) &&
-      (parameters.protein.prescribeProteinDensityDistribution ==
-       NULL)) { // homogeneous distribution
-    if (parameters.variation.isProteinVariation) {
-      if (proteinDensity[0] < 0 || proteinDensity[0] > 1)
-        mem3dg_runtime_error("{0<=phi<=1}");
-    } else {
-      if (proteinDensity[0] != 1 || parameters.bending.Kb != 0 ||
-          parameters.dirichlet.eta != 0 || parameters.adsorption.epsilon != 0 ||
-          parameters.aggregation.chi != 0){
-        if (pDensities.size() == 0){
-        mem3dg_runtime_warning(
-            "For homogeneous membrane simulation, good practice is to set "
-            "proteinDensity = 1, Kb = 0, eta  = 0, "
-            "epsilon = 0, chi = "
-            "0 to "
-            "avoid ambiguity & save computation!");
+  if (pDensities.size() == 0){
+    if (((proteinDensity - proteinDensity[0]).raw().norm() == 0) &&
+        (parameters.protein.prescribeProteinDensityDistribution ==
+        NULL)) { // homogeneous distribution
+      if (parameters.variation.isProteinVariation) {
+        if (proteinDensity[0] < 0 || proteinDensity[0] > 1)
+          mem3dg_runtime_error("{0<=phi<=1}");
+      } else {
+        if (proteinDensity[0] != 1 || parameters.bending.Kb != 0 ||
+            parameters.dirichlet.eta != 0 || parameters.adsorption.epsilon != 0 ||
+            parameters.aggregation.chi != 0){
+          mem3dg_runtime_warning(
+              "For homogeneous membrane simulation, good practice is to set "
+              "proteinDensity = 1, Kb = 0, eta  = 0, "
+              "epsilon = 0, chi = "
+              "0 to "
+              "avoid ambiguity & save computation!");
         }
       }
     }
