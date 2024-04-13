@@ -48,7 +48,10 @@ bool Euler::integrate() {
                                                {"protein", system.time},
                                                {"notableVertex", system.time},
                                                {"mask", system.time}};
-
+  for (int j = 0; j < system.pDensities.size(); j++){
+    lastUpdateTime.insert({"protein" + std::to_string(j), system.time});
+    lastUpdateTime.insert({"notableVertex" + std::to_string(j), system.time});
+  }
   // initialize netcdf traj file
 #ifdef MEM3DG_WITH_NETCDF
   if (ifOutputTrajFile) {
@@ -145,7 +148,10 @@ void Euler::status() {
   system.addNonconservativeForcing(timeStep);
 
   // exit if under error tolerance
-  if (system.mechErrorNorm < tolerance && system.chemErrorNorm < tolerance) {
+  bool flag = system.mechErrorNorm < tolerance && system.chemErrorNorm < tolerance;
+  for (int j = 0; j < system.chemErrorNorms.size(); j++)
+    flag = flag && system.chemErrorNorms[j];
+  if (flag) {
     if (ifPrintToConsole)
       std::cout << "\nError norm smaller than tolerance." << std::endl;
     EXIT = true;

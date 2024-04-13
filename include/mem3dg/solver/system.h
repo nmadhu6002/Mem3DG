@@ -396,10 +396,12 @@ public:
    */
   bool updatePrescription(std::map<std::string, double> &lastUpdateTime,
                           double timeStep);
-  bool updatePrescription(bool &ifMutateMesh, bool &ifUpdateNotableVertex,
-                          bool &ifUpdateGeodesics,
-                          bool &ifUpdateProteinDensityDistribution,
-                          bool &ifUpdateMask);
+  bool
+  updatePrescription(bool &ifMutateMesh, bool &ifUpdateNotableVertex,
+                     std::vector<bool> &ifUpdateNotableVertices, bool &ifUpdateGeodesics,
+                     bool &ifUpdateProteinDensityDistribution,
+                     std::vector<bool> &ifUpdateProteinDensityDistributions,
+                     bool &ifUpdateMask);
 
   // ==========================================================
   // ================        Force.cpp       ==================

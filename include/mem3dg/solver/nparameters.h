@@ -61,8 +61,23 @@ struct nProteinParameters {
     double Kdc = 0;
     /// Constant of Spontaneous curvature vs protein density
     double H0c = 0;
+    /// Area of protein
+    double area = 0;
     /// type of relation between H0 and protein density, "linear" or "hill"
     std::string relation = "linear";
+    /// precription of protein density
+    std::function<EigenVectorX1d(double, EigenVectorX1d, EigenVectorX1d)>
+        prescribeProteinDensityDistribution = NULL;
+    /// period of updating protein density distribution
+    std::size_t updateProteinDensityDistributionPeriod =
+        std::numeric_limits<std::size_t>::max();
+    /// prescription of center finding
+    std::function<Eigen::Matrix<bool, Eigen::Dynamic, 1>(
+        EigenVectorX3sr, EigenVectorX3dr, EigenVectorX1d)>
+        prescribeNotableVertex = NULL;
+    /// prescribeNotableVertex
+    std::size_t updateNotableVertexPeriod =
+        std::numeric_limits<std::size_t>::max();
 };
 
 } // namespace solver

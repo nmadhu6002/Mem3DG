@@ -396,56 +396,95 @@ void init_parameters(py::module_ &pymem3dg) {
   pParameters.def(py::init<>());
   pParameters.def_readwrite("isProteinVariation", &nProteinParameters::isProteinVariation,
                             R"delim(
-          get epsilon
+          get the option of whether simulate protein variation
       )delim");
   pParameters.def_readwrite("isProteinConservation", &nProteinParameters::isProteinConservation,
                             R"delim(
-          get epsilon
+          get the option of whether conserve protein mass
       )delim");
   pParameters.def_readwrite("proteinInteriorPenalty", &nProteinParameters::proteinInteriorPenalty,
                             R"delim(
-          get epsilon
+          get interior point parameter for protein density
       )delim");
   pParameters.def_readwrite("proteinMobility", &nProteinParameters::proteinMobility,
                             R"delim(
-          get epsilon
+          get protein mobility constant
       )delim");
   pParameters.def_readwrite("epsilon", &nProteinParameters::epsilon,
                             R"delim(
-          get epsilon
+          get adsorption energy per protein
       )delim");
   pParameters.def_readwrite("chi", &nProteinParameters::chi,
                             R"delim(
-          get epsilon
+          get aggregation energy
       )delim");
   pParameters.def_readwrite("xi", &nProteinParameters::xi,
                             R"delim(
-          get epsilon
+          get entropy parameters
       )delim");
   pParameters.def_readwrite("eta", &nProteinParameters::eta,
                             R"delim(
-          get epsilon
+          get eta
       )delim");
   pParameters.def_readwrite("Kgc", &nProteinParameters::Kgc,
                             R"delim(
-          get epsilon
+          get constant of Gaussian modulus vs protein density
       )delim");
   pParameters.def_readwrite("Kbc", &nProteinParameters::Kbc,
                             R"delim(
-          get epsilon
+          get constant of bending modulus vs protein density
       )delim");
   pParameters.def_readwrite("Kdc", &nProteinParameters::Kdc,
                             R"delim(
-          get epsilon
+          get constant of deviatoric modulus vs protein density
       )delim");
   pParameters.def_readwrite("H0c", &nProteinParameters::H0c,
                             R"delim(
-          get epsilon
+          get constant of spontaneous curvature vs protein density
+      )delim");
+  pParameters.def_readwrite("area", &nProteinParameters::area,
+                            R"delim(
+          get area of protein
       )delim");
   pParameters.def_readwrite("relation", &nProteinParameters::relation,
                             R"delim(
-          get epsilon
+          get relation between H0 and protein density, "linear" or "hill"
       )delim");
+  pParameters.def_readwrite(
+      "prescribeProteinDensityDistribution",
+      &nProteinParameters::prescribeProteinDensityDistribution,
+      R"delim(
+          functional to set the protein density distribution prescription
+        args:
+            time (float)
+            vertexMeanCurvatures (list)
+            geodesicDistance (list)
+        return:
+            proteinDensity (list)
+      )delim");
+  pParameters.def_readwrite(
+      "updateProteinDensityDistributionPeriod",
+      &nProteinParameters::updateProteinDensityDistributionPeriod,
+      R"delim(
+          period of updating protein density distribution. measured in # of iterations
+      )delim");
+  pParameters.def_readwrite("prescribeNotableVertex",
+                            &nProteinParameters::prescribeNotableVertex,
+                            R"delim(
+        Functional to find the notable vertex of the mesh
+
+        Args:
+            faceMatrix (npt.NDarray[int64])
+            vertexMatrix (npt.NDarray[float64])
+            geodesicDistance (list)
+        Returns:
+            list[bool]: List of whether each vertex is notable
+      )delim");
+  pParameters.def_readwrite("updateNotableVertexPeriod",
+                            &nProteinParameters::updateNotableVertexPeriod,
+                            R"delim(
+            the period factor of updating the vertex data of notable vertices. Measured in the unit of # of iterations.
+    )delim");
 }
 } // namespace integrator
 } // namespace solver

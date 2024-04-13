@@ -28,8 +28,12 @@ void System::initialize(bool ifMutateMesh) {
 
   bool ifUpdateNotableVertex = true, ifUpdateGeodesics = true,
        ifUpdateProteinDensityDistribution = true, ifUpdateMask = true;
-  updatePrescription(ifMutateMesh, ifUpdateNotableVertex, ifUpdateGeodesics,
-                     ifUpdateProteinDensityDistribution, ifUpdateMask);
+  std::vector<bool> ifUpdateProteinDensityDistributions(pDensities.size(), true);
+  std::vector<bool> ifUpdateNotableVertices(pDensities.size(), true);
+  updatePrescription(ifMutateMesh, ifUpdateNotableVertex,
+                     ifUpdateNotableVertices, ifUpdateGeodesics,
+                     ifUpdateProteinDensityDistribution,
+                     ifUpdateProteinDensityDistributions, ifUpdateMask);
 
   updateConfigurations();
   geometry.updateReferenceConfigurations();
@@ -200,9 +204,23 @@ bool System::updatePrescription(std::map<std::string, double> &lastUpdateTime,
        ifUpdateMask = (time - lastUpdateTime["mask"] >
                        (parameters.variation.updateMaskPeriod * timeStep));
 
+  std::vector<bool> ifUpdateProteinDensityDistributions;
+  std::vector<bool> ifUpdateNotableVertices;
+  for (int j = 0; j < pDensities.size(); j++){
+    ifUpdateProteinDensityDistributions.push_back(
+           (time - lastUpdateTime["protein" + std::to_string(j)] >
+            (pParameters[j].updateProteinDensityDistributionPeriod *
+             timeStep)));
+    ifUpdateNotableVertices.push_back(
+        (time - lastUpdateTime["notableVertex" + std::to_string(j)] >
+         (pParameters[j].updateNotableVertexPeriod * timeStep)));
+  }
+
   bool updated =
-      updatePrescription(ifMutateMesh, ifUpdateNotableVertex, ifUpdateGeodesics,
-                         ifUpdateProteinDensityDistribution, ifUpdateMask);
+      updatePrescription(ifMutateMesh, ifUpdateNotableVertex,
+                         ifUpdateNotableVertices, ifUpdateGeodesics,
+                         ifUpdateProteinDensityDistribution,
+                         ifUpdateProteinDensityDistributions, ifUpdateMask);
   if (ifMutateMesh)
     lastUpdateTime["mutateMesh"] = time;
   if (ifUpdateNotableVertex)
@@ -214,12 +232,20 @@ bool System::updatePrescription(std::map<std::string, double> &lastUpdateTime,
   if (ifUpdateMask)
     lastUpdateTime["mask"] = time;
 
+  for (int j = 0; j < pDensities.size(); j++){
+    if (ifUpdateProteinDensityDistributions[j])
+      lastUpdateTime["protein" + std::to_string(j)] = time;
+    if (ifUpdateNotableVertices[j])
+      lastUpdateTime["notableVertex" + std::to_string(j)] = time;
+  }
+
   return updated;
 }
 
 bool System::updatePrescription(bool &ifMutateMesh, bool &ifUpdateNotableVertex,
-                                bool &ifUpdateGeodesics,
+                                std::vector<bool> &ifUpdateNotableVertices, bool &ifUpdateGeodesics,
                                 bool &ifUpdateProteinDensityDistribution,
+                                std::vector<bool> &ifUpdateProteinDensityDistributions,
                                 bool &ifUpdateMask) {
 
   if (ifMutateMesh) {
@@ -260,6 +286,35 @@ bool System::updatePrescription(bool &ifMutateMesh, bool &ifUpdateNotableVertex,
     } else {
       ifUpdateProteinDensityDistribution = false;
       // mem3dg_runtime_warning("Parameter protein form is NULL!")
+    }
+  }
+
+  for (int j = 0; j < pDensities.size(); j++){
+    if (ifUpdateNotableVertices[j]) {
+      if (pParameters[j].prescribeNotableVertex != NULL) {
+        geometry.notableVertex.raw() = pParameters[j].prescribeNotableVertex(
+            geometry.mesh->getFaceVertexMatrix<std::size_t>(),
+            toMatrix(geometry.vpg->vertexPositions),
+            geometry.geodesicDistance.raw());
+      } else {
+        ifUpdateNotableVertices[j] = false;
+        // mem3dg_runtime_warning("Parameter.point.prescribeNotableVertex is
+        // NULL!");
+      }
+    }
+    if (ifUpdateGeodesics) {
+      geometry.computeGeodesicDistance();
+    }
+    if (ifUpdateProteinDensityDistributions[j]) {
+      if (pParameters[j].prescribeProteinDensityDistribution != NULL) {
+        pDensities[j].raw() =
+            pParameters[j].prescribeProteinDensityDistribution(
+                time, geometry.vpg->vertexMeanCurvatures.raw(),
+                geometry.geodesicDistance.raw());
+      } else {
+        ifUpdateProteinDensityDistributions[j] = false;
+        // mem3dg_runtime_warning("Parameter protein form is NULL!")
+      }
     }
   }
 
