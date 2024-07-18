@@ -142,6 +142,7 @@ public:
 
   std::vector<gcs::VertexData<double>> pDensities;
   std::vector<gcs::FaceData<gc::Vector3>> pDensityGradients;
+  std::vector<double> previousAreas;
 
   /// Cached vertex velocity
   gcs::VertexData<gc::Vector3> velocity;
@@ -620,6 +621,8 @@ public:
     double vertex2GeoDist = geometry.geodesicDistance[vertex2];
     double vertex1Phi = proteinDensity[vertex1];
     double vertex2Phi = proteinDensity[vertex2];
+    double vertex1Area = geometry.vpg->vertexDualAreas[vertex1];
+    double vertex2Area = geometry.vpg->vertexDualAreas[vertex2];
     std::vector<double> vertex1Phis;
     std::vector<double> vertex2Phis;
     for (int j = 0; j < pDensities.size(); j++){
@@ -645,8 +648,17 @@ public:
     geometry.geodesicDistance[newVertex] =
         0.5 * (vertex1GeoDist + vertex2GeoDist);
     proteinDensity[newVertex] = 0.5 * (vertex1Phi + vertex2Phi);
-    for (int j = 0; j < pDensities.size(); j++)
-      pDensities[j][newVertex] = 0.5 * (vertex1Phis[j] + vertex2Phis[j]);
+    for (int j = 0; j < pDensities.size(); j++){
+      if (pParameters[j].conserve)
+        pDensities[j][newVertex] =
+            (vertex1Phis[j] *
+                (vertex1Area - geometry.vpg->vertexDualAreas[vertex1]) +
+            vertex2Phis[j] *
+                (vertex2Area - geometry.vpg->vertexDualAreas[vertex2])) /
+            geometry.vpg->vertexDualAreas[newVertex];
+      else
+        pDensities[j][newVertex] = 0.5 * (vertex1Phis[j] + vertex2Phis[j]);
+    }
     geometry.notableVertex[newVertex] = false;
     forces.forceMask[newVertex] = gc::Vector3{1, 1, 1};
     return newVertex;
@@ -681,6 +693,12 @@ public:
       vertex1Phis.push_back(pDensities[j][vertex1]);
       vertex2Phis.push_back(pDensities[j][vertex2]);
     }
+    std::vector<double> totalProteins;
+    for (int j = 0; j < pDensities.size(); j++) {
+      totalProteins[j] =
+          pDensities[j][vertex1] * geometry.vpg->vertexDualAreas[vertex1] +
+          pDensities[j][vertex2] * geometry.vpg->vertexDualAreas[vertex2];
+    }
     bool vertex1PointTracker = geometry.notableVertex[vertex1];
     bool vertex2PointTracker = geometry.notableVertex[vertex2];
 
@@ -706,8 +724,13 @@ public:
       geometry.geodesicDistance[newVertex] =
           0.5 * (vertex1GeoDist + vertex2GeoDist);
       proteinDensity[newVertex] = 0.5 * (vertex1Phi + vertex2Phi);
-      for (int j = 0; j < pDensities.size(); j++)
-        pDensities[j][newVertex] = 0.5 * (vertex1Phis[j] + vertex2Phis[j]);
+      for (int j = 0; j < pDensities.size(); j++){
+        if (pParameters[j].conserve)
+          pDensities[j][newVertex] =
+              totalProteins[j] / geometry.vpg->vertexDualAreas[newVertex];
+        else
+          pDensities[j][newVertex] = 0.5 * (vertex1Phis[j] + vertex2Phis[j]);
+      }
       geometry.notableVertex[newVertex] =
           vertex1PointTracker || vertex2PointTracker;
     }

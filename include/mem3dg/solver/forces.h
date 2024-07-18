@@ -72,6 +72,8 @@ struct Forces {
   gcs::VertexData<double> lineCapillaryForce;
   /// Cached adsorption induced surface force
   gcs::VertexData<double> adsorptionForce;
+  /// Cached steric pressure induced surface force
+  gcs::VertexData<double> stericForce;
   /// Cached aggregation induced surface force
   gcs::VertexData<double> aggregationForce;
   /// Cached entropy induced surface force
@@ -118,6 +120,8 @@ struct Forces {
   gcs::VertexData<gc::Vector3> lineCapillaryForceVec;
   /// Cached adsorption driven force
   gcs::VertexData<gc::Vector3> adsorptionForceVec;
+  /// Cached steric pressure driven force
+  gcs::VertexData<gc::Vector3> stericForceVec;
   /// Cached aggregation driven force
   gcs::VertexData<gc::Vector3> aggregationForceVec;
   /// Cached entropy driven force
@@ -193,7 +197,7 @@ struct Forces {
         gaussianCurvatureForce(mesh, 0), deviatoricCurvatureForce(mesh, 0),
         areaDifferenceForce(mesh, 0), osmoticForce(mesh, 0),
         capillaryForce(mesh, 0), lineCapillaryForce(mesh, 0),
-        adsorptionForce(mesh, 0), aggregationForce(mesh, 0),
+        adsorptionForce(mesh, 0), stericForce(mesh, 0), aggregationForce(mesh, 0),
         entropyForce(mesh, 0), externalForce(mesh, 0),
         selfAvoidanceForce(mesh, 0), mechanicalForce(mesh, 0),
         conservativeForce(mesh, 0), osmoticPressure(0), surfaceTension(0),
@@ -208,7 +212,7 @@ struct Forces {
         areaDifferenceForceVec(mesh, {0, 0, 0}),
         capillaryForceVec(mesh, {0, 0, 0}), osmoticForceVec(mesh, {0, 0, 0}),
         lineCapillaryForceVec(mesh, {0, 0, 0}),
-        adsorptionForceVec(mesh, {0, 0, 0}),
+        adsorptionForceVec(mesh, {0, 0, 0}), stericForceVec(mesh, {0, 0, 0}),
         aggregationForceVec(mesh, {0, 0, 0}), entropyForceVec(mesh, {0, 0, 0}),
         externalForceVec(mesh, {0, 0, 0}),
         selfAvoidanceForceVec(mesh, {0, 0, 0}),
@@ -242,7 +246,7 @@ struct Forces {
         spontaneousCurvatureForceVec_gaussVec(mesh, {0, 0, 0}),
         spontaneousCurvatureForceVec_schlafliVec(mesh, {0, 0, 0}),
         capillaryForceVec(mesh, {0, 0, 0}), osmoticForceVec(mesh, {0, 0, 0}),
-        adsorptionForceVec(mesh, {0, 0, 0}),
+        adsorptionForceVec(mesh, {0, 0, 0}), stericForceVec(mesh, {0, 0, 0}),
         aggregationForceVec(mesh, {0, 0, 0}), entropyForceVec(mesh, {0, 0, 0}),
         externalForceVec(mesh, {0, 0, 0}),
         selfAvoidanceForceVec(mesh, {0, 0, 0}),
@@ -250,7 +254,7 @@ struct Forces {
         spontaneousCurvatureForce(mesh, 0), deviatoricCurvatureForce(mesh, 0),
         gaussianCurvatureForce(mesh, 0), areaDifferenceForce(mesh, 0),
         capillaryForce(mesh, 0), surfaceTension(0), lineCapillaryForce(mesh, 0),
-        adsorptionForce(mesh, 0), aggregationForce(mesh, 0),
+        adsorptionForce(mesh, 0), stericForce(mesh, 0), aggregationForce(mesh, 0),
         entropyForce(mesh, 0), externalForce(mesh, 0),
         selfAvoidanceForce(mesh, 0), osmoticForce(mesh, 0), osmoticPressure(0),
         springForceVec(mesh, {0, 0, 0}), edgeSpringForceVec(mesh, {0, 0, 0}),

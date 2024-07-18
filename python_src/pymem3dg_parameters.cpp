@@ -442,9 +442,21 @@ void init_parameters(py::module_ &pymem3dg) {
                             R"delim(
           get constant of spontaneous curvature vs protein density
       )delim");
-  pParameters.def_readwrite("area", &nProteinParameters::area,
+  pParameters.def_readwrite("rho", &nProteinParameters::rho,
                             R"delim(
-          get area of protein
+          get binding sites per area for protein
+      )delim");
+  pParameters.def_readwrite("steric", &nProteinParameters::steric,
+                            R"delim(
+          get if steric pressure is on or off
+      )delim");
+  pParameters.def_readwrite("conserve", &nProteinParameters::conserve,
+                            R"delim(
+          get whether to conserve total number of proteins
+      )delim");
+  pParameters.def_readwrite("conservePeriod", &nProteinParameters::conservePeriod,
+                            R"delim(
+          get whether to conserve total number of proteins
       )delim");
   pParameters.def_readwrite("relation", &nProteinParameters::relation,
                             R"delim(

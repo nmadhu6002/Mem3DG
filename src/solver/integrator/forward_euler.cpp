@@ -150,7 +150,7 @@ void Euler::status() {
   // exit if under error tolerance
   bool flag = system.mechErrorNorm < tolerance && system.chemErrorNorm < tolerance;
   for (int j = 0; j < system.chemErrorNorms.size(); j++)
-    flag = flag && system.chemErrorNorms[j];
+    flag = flag && (system.chemErrorNorms[j] < tolerance);
   if (flag) {
     if (ifPrintToConsole)
       std::cout << "\nError norm smaller than tolerance." << std::endl;
@@ -220,6 +220,26 @@ void Euler::march() {
                           toMatrix(system.forces.mechanicalForceVec).array())
                              .sum();
 
+  if (isBacktrack) {
+    mem3dg_runtime_error("Sorry, backtracking is not supported.");
+  }
+  else {
+    timeStep = characteristicTimeStep;
+  }
+
+  system.geometry.vpg->inputVertexPositions += system.velocity * timeStep;
+  for (int j = 0; j < system.pDensities.size(); j++){
+    if (system.pParameters[j].conserve && 
+        std::fmod(system.time, system.pParameters[j].conservePeriod) < std::pow(10, -4)){
+      for (std::size_t i = 0; i < system.geometry.mesh->nVertices(); ++i)
+        system.pDensities[j][i] *=
+            system.previousAreas[i] / system.geometry.vpg->vertexDualAreas[i];
+      system.previousAreas.clear();
+      for (std::size_t i = 0; i < system.geometry.mesh->nVertices(); ++i)
+        system.previousAreas.push_back(system.geometry.vpg->vertexDualAreas[i]);
+    }
+  }
+
   if (system.parameters.variation.isProteinVariation) {
     if (system.parameters.variation.isProteinConservation) {
       system.proteinRateOfChange.raw() =
@@ -264,24 +284,22 @@ void Euler::march() {
 
   // backtracking to obtain stable time step
   if (isBacktrack) {
-    double timeStep_mech = std::numeric_limits<double>::max(),
-           timeStep_chem = std::numeric_limits<double>::max();
-    if (system.parameters.variation.isShapeVariation)
-      timeStep_mech = mechanicalBacktrack(toMatrix(system.velocity));
-    if (system.parameters.variation.isProteinVariation)
-      timeStep_chem = chemicalBacktrack(system.proteinRateOfChange.raw());
-    timeStep = std::min(timeStep_chem, timeStep_mech);
-    for (int j = 0; j < system.pDensities.size(); ++j){
-      if (system.pParameters[j].isProteinVariation)
-        timeStep_chem =
-            NchemicalBacktrack(system.pRatesOfChange[j].raw(), j, rho, c1);
-      timeStep = std::min(timeStep, std::min(timeStep_chem, timeStep_mech));
-    }
+    mem3dg_runtime_error("Sorry, backtracking is not supported.");
+    // double timeStep_mech = std::numeric_limits<double>::max(),
+    //        timeStep_chem = std::numeric_limits<double>::max();
+    // if (system.parameters.variation.isShapeVariation)
+    //   timeStep_mech = mechanicalBacktrack(toMatrix(system.velocity));
+    // if (system.parameters.variation.isProteinVariation)
+    //   timeStep_chem = chemicalBacktrack(system.proteinRateOfChange.raw());
+    // timeStep = std::min(timeStep_chem, timeStep_mech);
+    // for (int j = 0; j < system.pDensities.size(); ++j){
+    //   if (system.pParameters[j].isProteinVariation)
+    //     timeStep_chem =
+    //         NchemicalBacktrack(system.pRatesOfChange[j].raw(), j, rho, c1);
+    //   timeStep = std::min(timeStep, std::min(timeStep_chem, timeStep_mech));
+    // }
     // (timeStep_chem < timeStep_mech) ? timeStep_chem : timeStep_mech;
-  } else {
-    timeStep = characteristicTimeStep;
   }
-  system.geometry.vpg->inputVertexPositions += system.velocity * timeStep;
   system.proteinDensity += system.proteinRateOfChange * timeStep;
   for (int j = 0; j < system.pDensities.size(); ++j){
     system.pDensities[j] += system.pRatesOfChange[j] * timeStep;

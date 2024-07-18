@@ -51,6 +51,8 @@ void System::initialize(bool ifMutateMesh) {
   for (int j = 0; j < pDensities.size(); ++j){
     chemErrorNorms[j] = forces.chemicalPotentials[j].raw().norm();
   }
+  for (std::size_t i = 0; i < geometry.mesh->nVertices(); ++i)
+      previousAreas.push_back(geometry.vpg->vertexDualAreas[i]);
 }
 
 void System::checkConfiguration() {

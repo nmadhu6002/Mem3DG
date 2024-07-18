@@ -62,7 +62,13 @@ struct nProteinParameters {
     /// Constant of Spontaneous curvature vs protein density
     double H0c = 0;
     /// Area of protein
-    double area = 0;
+    double rho = 0;
+    /// Is steric pressure on or off
+    bool steric = false;
+    /// Whether to conserve total number of proteins
+    bool conserve = false;
+    /// How often to conserve total number of proteins
+    double conservePeriod = 50.0;
     /// type of relation between H0 and protein density, "linear" or "hill"
     std::string relation = "linear";
     /// precription of protein density

@@ -64,6 +64,7 @@ void System::computeGeometricForces(size_t i) {
   gc::Vector3 osmoticForceVec{0, 0, 0};
   gc::Vector3 lineCapillaryForceVec{0, 0, 0};
   gc::Vector3 adsorptionForceVec{0, 0, 0};
+  gc::Vector3 stericForceVec{0, 0, 0};
   gc::Vector3 aggregationForceVec{0, 0, 0};
   gc::Vector3 entropyForceVec{0, 0, 0};
   double Ai = geometry.vpg->vertexDualAreas[i];
@@ -77,6 +78,19 @@ void System::computeGeometricForces(size_t i) {
   for (int j = 0; j < n; ++j) {
     pDensitiesi.push_back(pDensities[j][i]);
   }
+  double totalAreai = 0;
+  for (int j = 0; j < n; ++j) {
+    totalAreai += pDensities[j][i];
+  }
+  // if (totalAreai > 1)
+  //   totalAreai = 1.0;
+  double reducedPressurei =
+      totalAreai * (1 + 2 * totalAreai * (1 - 7 * totalAreai / 16) /
+                            pow((1 - totalAreai), 2));
+  double dreducedPressurei =
+      (pow(totalAreai, 3) - 3 * pow(totalAreai, 2) - 8 * totalAreai - 8) /
+      (8 * pow((totalAreai - 1), 3));
+  double sterici = reducedPressurei - totalAreai * dreducedPressurei;
   double areaDifferenceK =
       0.25 * parameters.bending.alpha * parameters.bending.Kb * constants::PI;
   double totalMeanCurvature = geometry.vpg->vertexMeanCurvatures.raw().sum();
@@ -104,6 +118,19 @@ void System::computeGeometricForces(size_t i) {
     for (int j = 0; j < n; ++j) {
       pDensitiesj.push_back(pDensities[j][i_vj]);
     }
+    double totalAreaj = 0;
+    for (int j = 0; j < n; ++j) {
+      totalAreaj += pDensities[j][i_vj];
+    }
+    // if (totalAreaj > 1)
+    //   totalAreaj = 1.0;
+    double reducedPressurej =
+        totalAreaj * (1 + 2 * totalAreaj * (1 - 7 * totalAreaj / 16) /
+                              pow((1 - totalAreaj), 2));
+    double dreducedPressurej =
+        (pow(totalAreaj, 3) - 3 * pow(totalAreaj, 2) - 8 * totalAreaj - 8) /
+        (8 * pow((totalAreaj - 1), 3));
+    double stericj = reducedPressurej - totalAreaj * dreducedPressurej;
     bool interiorHalfedge = he.isInterior();
     // bool boundaryEdge = he.edge().isBoundary();
 
@@ -215,6 +242,13 @@ void System::computeGeometricForces(size_t i) {
       if (pParameters[j].epsilon != 0) // adsorption force
         adsorptionForceVec -= (pDensitiesi[j] / 3 + pDensitiesj[j] * 2 / 3) *
                               pParameters[j].epsilon * areaGrad;
+      if (pParameters[j].rho != 0 && pParameters[j].steric){
+        stericForceVec -= (constants::kBoltzmann * parameters.temperature * pParameters[j].rho) *
+                          (sterici / 3 + stericj * 2 / 3) * areaGrad;
+        // std::cout << reducedPressurei << " " << totalAreai << " "
+        //           << dreducedPressurei << " " << reducedPressurej << " " << totalAreaj << " " << dreducedPressurej << " " 
+        //           << sterici << " " << stericj << std::endl;
+      }
       if (pParameters[j].chi != 0) // aggregation force
         aggregationForceVec -=
             (pow(pow(2 * pDensitiesi[j] - 1, 2) - 1, 2) / 3 +
@@ -280,6 +314,7 @@ void System::computeGeometricForces(size_t i) {
   capillaryForceVec = forces.maskForce(capillaryForceVec, i);
   lineCapillaryForceVec = forces.maskForce(lineCapillaryForceVec, i);
   adsorptionForceVec = forces.maskForce(adsorptionForceVec, i);
+  stericForceVec = forces.maskForce(stericForceVec, i);
   aggregationForceVec = forces.maskForce(aggregationForceVec, i);
   entropyForceVec = forces.maskForce(entropyForceVec, i);
 
@@ -301,6 +336,7 @@ void System::computeGeometricForces(size_t i) {
   forces.osmoticForceVec[i] = osmoticForceVec;
   forces.lineCapillaryForceVec[i] = lineCapillaryForceVec;
   forces.adsorptionForceVec[i] = adsorptionForceVec;
+  forces.stericForceVec[i] = stericForceVec;
   forces.aggregationForceVec[i] = aggregationForceVec;
   forces.entropyForceVec[i] = entropyForceVec;
 
@@ -316,6 +352,7 @@ void System::computeGeometricForces(size_t i) {
   forces.osmoticForce[i] = forces.ontoNormal(osmoticForceVec, i);
   forces.lineCapillaryForce[i] = forces.ontoNormal(lineCapillaryForceVec, i);
   forces.adsorptionForce[i] = forces.ontoNormal(adsorptionForceVec, i);
+  forces.stericForce[i] = forces.ontoNormal(stericForceVec, i);
   forces.aggregationForce[i] = forces.ontoNormal(aggregationForceVec, i);
   forces.entropyForce[i] = forces.ontoNormal(entropyForceVec, i);
 }
@@ -497,21 +534,21 @@ void System::computeNChemicalPotentials(int j) {
     dKgdphi.fill(parameters.bending.Kgc);
   } else if (pParameters[j].relation == "hill") {
     EigenVectorX1d proteinDensitySq =
-        (pDensities[j].raw().array() * pDensities[j].raw().array()).matrix();
+        (pParameters[j].rho * pDensities[j].raw().array() * pParameters[j].rho * pDensities[j].raw().array()).matrix();
     dH0dphi.raw() =
-        (2 * pParameters[j].H0c * pDensities[j].raw().array() /
+        (2 * pParameters[j].H0c * pParameters[j].rho * pDensities[j].raw().array() /
         ((1 + proteinDensitySq.array()) * (1 + proteinDensitySq.array())))
             .matrix();
     dKbdphi.raw() =
-        (2 * pParameters[j].Kbc * pDensities[j].raw().array() /
+        (2 * pParameters[j].Kbc * pParameters[j].rho * pDensities[j].raw().array() /
         ((1 + proteinDensitySq.array()) * (1 + proteinDensitySq.array())))
             .matrix();
     dKddphi.raw() =
-        (2 * pParameters[j].Kdc * pDensities[j].raw().array() /
+        (2 * pParameters[j].Kdc * pParameters[j].rho * pDensities[j].raw().array() /
         ((1 + proteinDensitySq.array()) * (1 + proteinDensitySq.array())))
             .matrix();
     dKgdphi.raw() =
-        (2 * pParameters[j].Kgc * pDensities[j].raw().array() /
+        (2 * pParameters[j].Kgc * pParameters[j].rho * pDensities[j].raw().array() /
          ((1 + proteinDensitySq.array()) * (1 + proteinDensitySq.array())))
             .matrix();
   }
@@ -541,7 +578,7 @@ void System::computeNChemicalPotentials(int j) {
 
   if (pParameters[j].epsilon != 0)
     forces.adsorptionPotentials[j].raw() =
-        forces.maskProtein(-pParameters[j].epsilon *
+        forces.maskProtein(-pParameters[j].rho * pParameters[j].epsilon *
                           geometry.vpg->vertexDualAreas.raw().array());
 
   if (pParameters[j].chi != 0)
@@ -564,7 +601,7 @@ void System::computeNChemicalPotentials(int j) {
   if (pParameters[j].eta != 0)
     forces.dirichletPotentials[j].raw() =
         forces.maskProtein(-pParameters[j].eta *
-                          geometry.vpg->cotanLaplacian * pDensities[j].raw());
+                          geometry.vpg->cotanLaplacian * (pParameters[j].rho * pDensities[j].raw()));
 
   if (parameters.protein.proteinInteriorPenalty != 0) {
     // Doing some tricks to penalize
@@ -800,6 +837,7 @@ void System::computeConservativeForcing() {
   forces.osmoticForceVec.fill({0, 0, 0});
   forces.lineCapillaryForceVec.fill({0, 0, 0});
   forces.adsorptionForceVec.fill({0, 0, 0});
+  forces.stericForceVec.fill({0, 0, 0});
   forces.aggregationForceVec.fill({0, 0, 0});
   forces.entropyForceVec.fill({0, 0, 0});
   forces.selfAvoidanceForceVec.fill({0, 0, 0});
@@ -818,6 +856,7 @@ void System::computeConservativeForcing() {
   forces.lineCapillaryForce.raw().setZero();
   forces.externalForce.raw().setZero();
   forces.adsorptionForce.raw().setZero();
+  forces.stericForce.raw().setZero();
   forces.aggregationForce.raw().setZero();
   forces.entropyForce.raw().setZero();
   forces.osmoticForce.raw().setZero();
@@ -865,8 +904,9 @@ void System::computeConservativeForcing() {
         forces.spontaneousCurvatureForceVec + forces.gaussianCurvatureForceVec +
         forces.deviatoricCurvatureForceVec + forces.areaDifferenceForceVec +
         forces.lineCapillaryForceVec + forces.adsorptionForceVec +
-        forces.aggregationForceVec + forces.entropyForceVec +
-        forces.selfAvoidanceForceVec + forces.springForceVec;
+        forces.stericForceVec + forces.aggregationForceVec +
+        forces.entropyForceVec + forces.selfAvoidanceForceVec +
+        forces.springForceVec;
     forces.conservativeForce = forces.ontoNormal(forces.conservativeForceVec);
 
     // mechanical force includes all conservative forces
