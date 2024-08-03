@@ -231,12 +231,23 @@ void Euler::march() {
   for (int j = 0; j < system.pDensities.size(); j++){
     if (system.pParameters[j].conserve && 
         std::fmod(system.time, system.pParameters[j].conservePeriod) < std::pow(10, -4)){
+      std::vector<double> area;
+      for (std::size_t i = 0; i < system.geometry.mesh->nVertices(); ++i){
+        if (system.pParameters[j].side == "inside")
+          area.push_back(system.geometry.vpg->vertexDualAreas[i] -
+                         system.geometry.vpg->vertexMeanCurvatures[i] *
+                             system.pParameters[j].d);
+        if (system.pParameters[j].side == "outside")
+          area.push_back(system.geometry.vpg->vertexDualAreas[i] +
+                         system.geometry.vpg->vertexMeanCurvatures[i] *
+                             system.pParameters[j].d);
+      }
+
       for (std::size_t i = 0; i < system.geometry.mesh->nVertices(); ++i)
-        system.pDensities[j][i] *=
-            system.previousAreas[i] / system.geometry.vpg->vertexDualAreas[i];
-      system.previousAreas.clear();
+        system.pDensities[j][i] *= system.previousAreas[j][i] / area[i];
+      system.previousAreas[j].clear();
       for (std::size_t i = 0; i < system.geometry.mesh->nVertices(); ++i)
-        system.previousAreas.push_back(system.geometry.vpg->vertexDualAreas[i]);
+        system.previousAreas[j].push_back(area[i]);
     }
   }
 

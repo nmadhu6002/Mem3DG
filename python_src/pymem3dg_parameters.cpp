@@ -458,6 +458,14 @@ void init_parameters(py::module_ &pymem3dg) {
                             R"delim(
           get whether to conserve total number of proteins
       )delim");
+  pParameters.def_readwrite("d", &nProteinParameters::d,
+                            R"delim(
+          get distance between membrane neutral plane and plane of steric repulsions
+      )delim");
+  pParameters.def_readwrite("side", &nProteinParameters::side,
+                            R"delim(
+          get which side the protien is on
+      )delim");
   pParameters.def_readwrite("relation", &nProteinParameters::relation,
                             R"delim(
           get relation between H0 and protein density, "linear" or "hill"

@@ -142,7 +142,7 @@ public:
 
   std::vector<gcs::VertexData<double>> pDensities;
   std::vector<gcs::FaceData<gc::Vector3>> pDensityGradients;
-  std::vector<double> previousAreas;
+  std::vector<std::vector<double>> previousAreas;
 
   /// Cached vertex velocity
   gcs::VertexData<gc::Vector3> velocity;

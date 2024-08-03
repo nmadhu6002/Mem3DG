@@ -146,13 +146,6 @@ void init_forces(py::module_ &pymem3dg) {
           get the adsorption force
       )delim");
   forces.def(
-      "getStericForceVec",
-      [](Forces &s) { return toMatrix(s.stericForceVec); },
-      py::return_value_policy::copy,
-      R"delim(
-          get the steric force
-      )delim");
-  forces.def(
       "getAggregationForceVec",
       [](Forces &s) { return toMatrix(s.aggregationForceVec); },
       py::return_value_policy::copy,

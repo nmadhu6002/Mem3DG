@@ -51,8 +51,22 @@ void System::initialize(bool ifMutateMesh) {
   for (int j = 0; j < pDensities.size(); ++j){
     chemErrorNorms[j] = forces.chemicalPotentials[j].raw().norm();
   }
-  for (std::size_t i = 0; i < geometry.mesh->nVertices(); ++i)
-      previousAreas.push_back(geometry.vpg->vertexDualAreas[i]);
+  for (int j = 0; j < pDensities.size(); j++){
+    std::vector<double> init;
+    if (pParameters[j].side == "inside"){
+      for (std::size_t i = 0; i < geometry.mesh->nVertices(); ++i)
+        init.push_back(geometry.vpg->vertexDualAreas[i] -
+                       geometry.vpg->vertexMeanCurvatures[i] *
+                           pParameters[j].d);
+    }
+    if (pParameters[j].side == "outside"){
+      for (std::size_t i = 0; i < geometry.mesh->nVertices(); ++i)
+        init.push_back(geometry.vpg->vertexDualAreas[i] +
+                       geometry.vpg->vertexMeanCurvatures[i] *
+                           pParameters[j].d);
+    }
+    previousAreas.push_back(init);
+  }
 }
 
 void System::checkConfiguration() {
@@ -121,6 +135,8 @@ void System::updateConfigurations() {
     }
   }
 
+  H0 = gcs::VertexData<double>(*geometry.mesh, 0);
+
   // Update protein density dependent quantities
   if (parameters.bending.relation == "linear") {
     H0.raw() = proteinDensity.raw() * parameters.bending.H0c;
@@ -146,6 +162,36 @@ void System::updateConfigurations() {
                                            (1 + proteinDensitySq.array());
   } else {
     mem3dg_runtime_error("updateVertexPosition: P.relation is invalid option!");
+  }
+
+  gcs::VertexData<double> totalIn = gcs::VertexData<double>(*geometry.mesh, 0);
+  gcs::VertexData<double> totalOut = gcs::VertexData<double>(*geometry.mesh, 0);
+  for (int j = 0; j < pDensities.size(); ++j){
+    for (std::size_t i = 0; i < geometry.mesh->nVertices(); ++i){
+      if (pParameters[j].side == "inside")
+        totalIn[i] = totalIn[i] + pDensities[j][i];
+      if (pParameters[j].side == "outside")
+        totalOut[i] = totalOut[i] + pDensities[j][i];
+    }
+  }
+
+  gcs::VertexData<double> pressureDiff = gcs::VertexData<double>(*geometry.mesh, 0);
+  for (std::size_t i = 0; i < geometry.mesh->nVertices(); ++i){
+    pressureDiff[i] =
+        totalOut[i] * (1 + 2 * totalOut[i] * (1 - 7 * totalOut[i] / 16) /
+                               pow((1 - totalOut[i]), 2)) -
+        totalIn[i] * (1 + 2 * totalIn[i] * (1 - 7 * totalIn[i] / 16) /
+                              pow((1 - totalIn[i]), 2));
+  }
+
+  for (int j = 0; j < pDensities.size(); ++j){
+    if (pParameters[j].steric){
+      for (std::size_t i = 0; i < geometry.mesh->nVertices(); ++i){
+        H0[i] = H0[i] + 0.5 * constants::kBoltzmann * pParameters[j].d *
+                                parameters.temperature * pParameters[j].rho /
+                                Kb[i] * pressureDiff[i];
+      }
+    }
   }
 
   // Update n protein density dependent quantitites

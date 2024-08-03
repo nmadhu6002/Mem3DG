@@ -61,7 +61,7 @@ struct nProteinParameters {
     double Kdc = 0;
     /// Constant of Spontaneous curvature vs protein density
     double H0c = 0;
-    /// Area of protein
+    /// 1/Area of protein
     double rho = 0;
     /// Is steric pressure on or off
     bool steric = false;
@@ -69,6 +69,10 @@ struct nProteinParameters {
     bool conserve = false;
     /// How often to conserve total number of proteins
     double conservePeriod = 50.0;
+    /// Distance between membrane neutral plane and plane of steric repulsions
+    double d = 5e-3;
+    /// Which side the protien is on
+    std::string side = "outside";
     /// type of relation between H0 and protein density, "linear" or "hill"
     std::string relation = "linear";
     /// precription of protein density
