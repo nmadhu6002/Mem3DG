@@ -245,9 +245,6 @@ void System::computeGeometricForces(size_t i) {
       if (pParameters[j].rho != 0 && pParameters[j].steric){
         stericForceVec -= (constants::kBoltzmann * parameters.temperature * pParameters[j].rho) *
                           (sterici / 3 + stericj * 2 / 3) * areaGrad;
-        // std::cout << reducedPressurei << " " << totalAreai << " "
-        //           << dreducedPressurei << " " << reducedPressurej << " " << totalAreaj << " " << dreducedPressurej << " " 
-        //           << sterici << " " << stericj << std::endl;
       }
       if (pParameters[j].chi != 0) // aggregation force
         aggregationForceVec -=

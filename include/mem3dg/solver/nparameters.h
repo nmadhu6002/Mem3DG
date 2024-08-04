@@ -61,7 +61,7 @@ struct nProteinParameters {
     double Kdc = 0;
     /// Constant of Spontaneous curvature vs protein density
     double H0c = 0;
-    /// Area of protein
+    /// 1/Area of protein
     double rho = 0;
     /// Is steric pressure on or off
     bool steric = false;
