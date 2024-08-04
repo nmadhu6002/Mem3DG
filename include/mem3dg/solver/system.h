@@ -695,9 +695,9 @@ public:
     }
     std::vector<double> totalProteins;
     for (int j = 0; j < pDensities.size(); j++) {
-      totalProteins[j] =
+      totalProteins.push_back(
           pDensities[j][vertex1] * geometry.vpg->vertexDualAreas[vertex1] +
-          pDensities[j][vertex2] * geometry.vpg->vertexDualAreas[vertex2];
+          pDensities[j][vertex2] * geometry.vpg->vertexDualAreas[vertex2]);
     }
     bool vertex1PointTracker = geometry.notableVertex[vertex1];
     bool vertex2PointTracker = geometry.notableVertex[vertex2];
