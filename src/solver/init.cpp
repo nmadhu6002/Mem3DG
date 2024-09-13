@@ -53,6 +53,7 @@ void System::initialize(bool ifMutateMesh) {
   }
   for (std::size_t i = 0; i < geometry.mesh->nVertices(); ++i)
       previousAreas.push_back(geometry.vpg->vertexDualAreas[i]);
+  previousArea = geometry.surfaceArea;
 }
 
 void System::checkConfiguration() {

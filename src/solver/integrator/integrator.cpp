@@ -518,6 +518,8 @@ void Integrator::saveData(bool outputTrajFile, bool outputMeshFile,
       std::cout << system.chemErrorNorms[j] << ", ";
     }
     std::cout << std::endl;
+    std::cout << "surface area: " << system.geometry.vpg->faceAreas.raw().sum();
+    std::cout << std::endl;
 
     // report the backtracking if verbose
     if (timeStep != characteristicTimeStep && printToConsole) {

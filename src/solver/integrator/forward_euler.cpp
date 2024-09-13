@@ -215,10 +215,10 @@ void Euler::march() {
 
   // fixPointIteration(flowMap, characteristicTimeStep, 0.01);
 
-  system.velocity = system.forces.mechanicalForceVec;
-  system.mechErrorNorm = (toMatrix(system.velocity).array() *
-                          toMatrix(system.forces.mechanicalForceVec).array())
-                             .sum();
+  // adjust time step if adopt adaptive time step based on mesh size
+  if (ifAdaptiveStep) {
+    characteristicTimeStep = getAdaptiveCharacteristicTimeStep();
+  }
 
   if (isBacktrack) {
     mem3dg_runtime_error("Sorry, backtracking is not supported.");
@@ -226,17 +226,32 @@ void Euler::march() {
   else {
     timeStep = characteristicTimeStep;
   }
+  system.time += timeStep;
+
+  system.velocity = system.forces.mechanicalForceVec;
+  system.mechErrorNorm = (toMatrix(system.velocity).array() *
+                          toMatrix(system.forces.mechanicalForceVec).array())
+                             .sum();
 
   system.geometry.vpg->inputVertexPositions += system.velocity * timeStep;
+  system.updateConfigurations();
   for (int j = 0; j < system.pDensities.size(); j++){
     if (system.pParameters[j].conserve && 
-        std::fmod(system.time, system.pParameters[j].conservePeriod) < std::pow(10, -4)){
-      for (std::size_t i = 0; i < system.geometry.mesh->nVertices(); ++i)
-        system.pDensities[j][i] *=
-            system.previousAreas[i] / system.geometry.vpg->vertexDualAreas[i];
+        std::fmod(system.time, system.pParameters[j].conservePeriod * timeStep) < std::pow(10, -4)){
+      for (std::size_t i = 0; i < system.geometry.mesh->nVertices(); ++i){
+        if (system.pParameters[j].conserveType == "global")
+          system.pDensities[j][i] *=
+              system.previousArea / system.geometry.surfaceArea;
+        else if (system.pParameters[j].conserveType == "local")
+          system.pDensities[j][i] *=
+              system.previousAreas[i] / system.geometry.vpg->vertexDualAreas[i];
+      }
+
       system.previousAreas.clear();
       for (std::size_t i = 0; i < system.geometry.mesh->nVertices(); ++i)
         system.previousAreas.push_back(system.geometry.vpg->vertexDualAreas[i]);
+
+      system.previousArea = system.geometry.surfaceArea;
     }
   }
 
@@ -277,14 +292,9 @@ void Euler::march() {
     }
   }
 
-  // adjust time step if adopt adaptive time step based on mesh size
-  if (ifAdaptiveStep) {
-    characteristicTimeStep = getAdaptiveCharacteristicTimeStep();
-  }
 
   // backtracking to obtain stable time step
-  if (isBacktrack) {
-    mem3dg_runtime_error("Sorry, backtracking is not supported.");
+  // if (isBacktrack) {
     // double timeStep_mech = std::numeric_limits<double>::max(),
     //        timeStep_chem = std::numeric_limits<double>::max();
     // if (system.parameters.variation.isShapeVariation)
@@ -299,12 +309,11 @@ void Euler::march() {
     //   timeStep = std::min(timeStep, std::min(timeStep_chem, timeStep_mech));
     // }
     // (timeStep_chem < timeStep_mech) ? timeStep_chem : timeStep_mech;
-  }
+  // }
   system.proteinDensity += system.proteinRateOfChange * timeStep;
   for (int j = 0; j < system.pDensities.size(); ++j){
     system.pDensities[j] += system.pRatesOfChange[j] * timeStep;
   }
-  system.time += timeStep;
 
   // recompute cached values
   system.updateConfigurations();

@@ -458,6 +458,10 @@ void init_parameters(py::module_ &pymem3dg) {
                             R"delim(
           get whether to conserve total number of proteins
       )delim");
+  pParameters.def_readwrite("conserveType", &nProteinParameters::conserveType,
+                            R"delim(
+          type of protein conservation
+      )delim");
   pParameters.def_readwrite("relation", &nProteinParameters::relation,
                             R"delim(
           get relation between H0 and protein density, "linear" or "hill"

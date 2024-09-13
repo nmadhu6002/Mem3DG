@@ -69,6 +69,8 @@ struct nProteinParameters {
     bool conserve = false;
     /// How often to conserve total number of proteins
     double conservePeriod = 50.0;
+    /// Type of protein conservation
+    std::string conserveType = "local";
     /// type of relation between H0 and protein density, "linear" or "hill"
     std::string relation = "linear";
     /// precription of protein density
